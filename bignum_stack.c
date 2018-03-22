@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+/**
+ * LINK for bigNum implamtaion
+ * two sides in order to mantain a connection to the rest of the links
+ * array of integer, of size 18 to hold the number. 18 is the maximal digit number that
+ * can be held in a long variable.
+ * used: an integer to determine how match cells in the array are we using
+ */
 typedef struct link { // sizeof = 96 bit
     struct link * next;
     struct link * prev;
@@ -8,12 +16,47 @@ typedef struct link { // sizeof = 96 bit
     int digits[18];
 } link;
 
+/**
+ * BINNUM data stacture for holding big integers
+ * number of digits: integer to hold the number of digits in the big integer
+ * sign: the bit sign 0 for positive and 1 for negative
+ * head and last pointers : holding the first and last chunks of the number
+ */
 typedef struct bignum { // sizeof = 32 bit
     long number_of_digits;
     int sign;
     link *head;
     link *last;
 } bignum;
+
+
+/**
+ * ****external asm function for aritmetic operations****
+ * SUPPORTED ops:
+ * + : addition of two big integers
+ * - : subtraction of two big integers
+ * * : multyplication of two big integers
+ * : : divition of two big integers
+ */
+extern int _add (bignum*, bignum*); // todo in ASM
+extern int _substract (bignum*, bignum*); // todo in ASM
+extern int _multiply (bignum*, bignum*); // todo in ASM
+extern int _divide (bignum*, bignum*); // todo in ASM
+
+
+/**
+ * bigNum Stack
+ *  SUPPORTED ops:
+ *  * void push(@Pamram bignum* toPush); - push element into the stack
+ *  * bignum*  pop(void); -pop the top element of the stack
+ *  * int isEmpty(void); -check if the stack is empty
+ *  * void print_bignum(@Pamram bignum *bn); -print the whole stack, and empty the stack
+ */
+void push(bignum* toPush);
+bignum*  pop(void);
+int isEmpty(void);
+void print_bignum(bignum *bn);
+void print_stack(void);
 
 struct stack {
     bignum* arr[1024];
@@ -22,16 +65,7 @@ struct stack {
 typedef struct stack STACK;
 STACK s; // the instance of stack we'll be using
 
-extern int _add (bignum*, bignum*); // todo in ASM
-extern int _substract (bignum*, bignum*); // todo in ASM
-extern int _multiply (bignum*, bignum*); // todo in ASM
-extern int _divide (bignum*, bignum*); // todo in ASM
 
-void push(bignum* toPush);
-bignum*  pop(void);
-int isEmpty(void);
-void print_bignum(bignum *bn);
-void print_stack(void);
 
 int main() {
     s.top = -1; // init stack
@@ -106,6 +140,16 @@ int main() {
     return 0;
 }
 
+/*******************************************************************
+ * BIGNUM stack implantation****************************************
+ * *****************************************************************
+ */
+
+/**
+ * PUSH
+ * pushes the bigNum into the stack
+ * @param bigNum pointer
+ */
 void push (bignum* toPush) {
     if (s.top == (1024 - 1))
     {
@@ -119,6 +163,11 @@ void push (bignum* toPush) {
     }
 }
 
+/**
+ * POP
+ * return the top element of the stack and removes it.
+ * @return bigNum pointer
+ */
 bignum* pop () {
     bignum *num;
     if (s.top == - 1)
@@ -134,6 +183,11 @@ bignum* pop () {
     return(num);
 }
 
+
+/**
+ * isEMPTY
+ * @return 1 for stack being empty 0 otherwise
+ */
 int isEmpty(){
     return s.top == -1;
 }
