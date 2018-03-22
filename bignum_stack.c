@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <memory.h>
-
 
 typedef struct link {
     struct link * next;
@@ -85,12 +83,13 @@ int main() {
                 link* newLink = (link*) malloc(sizeof(link));
                 newLink->used =1;
                 newLink->prev = bn->last;
-                newLink->digits[bn->last->used-1] = c - '0';
+                bn->last->next = newLink;
+                newLink->digits[0] = c - '0';
                 bn->last = newLink;
                 bn->number_of_digits ++;
             }
             else{
-                bn->last->digits[bn->last->used-1] = c - '0';
+                bn->last->digits[bn->last->used] = c - '0';
                 bn->last->used ++;
                 bn->number_of_digits ++;
             }
@@ -165,4 +164,3 @@ void print_stack(){
     }
     printf ("\n");
 }
-
