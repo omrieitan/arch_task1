@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct link {
+typedef struct link { // sizeof = 96 bit
     struct link * next;
     struct link * prev;
     int used;
     int digits[18];
 } link;
 
-typedef struct bignum {
+typedef struct bignum { // sizeof = 32 bit
     long number_of_digits;
     int sign;
     link *head;
@@ -22,10 +22,10 @@ struct stack {
 typedef struct stack STACK;
 STACK s; // the instance of stack we'll be using
 
-extern int _add (bignum, bignum); // todo in ASM
-extern int _substract (bignum, bignum); // todo in ASM
-extern int _multiply (bignum, bignum); // todo in ASM
-extern int _divide (bignum, bignum); // todo in ASM
+extern int _add (bignum*, bignum*); // todo in ASM
+extern int _substract (bignum*, bignum*); // todo in ASM
+extern int _multiply (bignum*, bignum*); // todo in ASM
+extern int _divide (bignum*, bignum*); // todo in ASM
 
 void push(bignum* toPush);
 bignum*  pop(void);
@@ -51,7 +51,7 @@ int main() {
             // todo devide
         }
         else if(c == '+'){
-            // todo add
+            printf("%i\n",_add(pop(),pop()));
         }
         else if(c == '-'){
             // todo subtract

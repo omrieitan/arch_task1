@@ -1,0 +1,30 @@
+# flags
+CC = gcc
+ASM = nasm
+ASM_FLAGS = -f elf64
+
+
+# All Targets
+all: calc
+
+# link and build program
+calc: bin/add.o bin/bignum_stack.o
+	@echo 'Building targets'
+	$(CC) -o bin/calc bin/add.o bin/bignum_stack.o 
+	@echo 'Finished building targets'
+	@echo ' '
+
+# compile each file
+bin/add.o: add.s
+	$(ASM) $(ASM_FLAGS)  add.s -o bin/add.o
+	
+bin/bignum_stack.o: bignum_stack.c
+	$(CC) -c bignum_stack.c -o bin/bignum_stack.o
+	
+# Clean the build directory
+clean: 
+	rm -f bin/*
+
+# Run program
+run:
+	./bin/calc
