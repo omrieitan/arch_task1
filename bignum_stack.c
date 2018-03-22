@@ -3,14 +3,22 @@
 #include <memory.h>
 
 
+typedef struct link {
+    struct link * next;
+    struct link * prev;
+    int used;
+    int digits[18];
+} link;
+
 typedef struct bignum {
     long number_of_digits;
-    char *digit;
-    char sign;
+    int sign;
+    link *head;
+    link *last;
 } bignum;
 
 struct stack {
-    bignum arr[1024];
+    bignum* arr[1024];
     int top;
 };
 typedef struct stack STACK;
@@ -21,73 +29,75 @@ extern int _substract (bignum, bignum); // todo in ASM
 extern int _multiply (bignum, bignum); // todo in ASM
 extern int _divide (bignum, bignum); // todo in ASM
 
-void push(bignum toPush);
-bignum  pop(void);
+void push(bignum* toPush);
+bignum*  pop(void);
 int isEmpty(void);
-void print_bignum(bignum bn);
+void print_bignum(bignum *bn);
 void print_stack(void);
-bignum new_bignum(char*, char);
 
 int main() {
     s.top = -1; // init stack
     while(1) {
-        int size = 10;
-        char* str;
-        str = (char*) calloc(size,sizeof(char));
         char c;
-        char sign;
         c = (char) getchar();
-        if(c == '_')
-            sign = '1';
-        else
-            sign = '0';
-        int t = 0;
-        int cnt = 0;
-        while(c!='\n') {
-            if(cnt > size)
-                str = (char*) realloc(str,2*cnt); // inc size if needed
+        bignum* bn= (bignum*) malloc(sizeof(bignum));
+        bn->number_of_digits = 0;
+        bn->head = (link*) malloc(sizeof(link));
+        bn->head->used=0;
+        bn->last = bn->head;
 
-            str[t] = (char) (c - '1');
+        if(c == '*'){
+            // todo multiply
+        }
+        else if(c == '/'){
+            // todo devide
+        }
+        else if(c == '+'){
+            // todo add
+        }
+        else if(c == '-'){
+            // todo subtract
+        }
+        else if(c == 'p'){
+            // todo print stack
+        }
+        else if(c == 'c'){
+            // todo clear stack
+        }
+        else if(c == 'q'){
+            // todo quit
+        }
+        else if(c == '_')
+            bn->sign = 1;
+        else { // if c is a number (0-9)
+            bn->sign = 0;
+            bn->head->digits[0] = c - '0' ;
+            bn->head->used++;
+            bn->number_of_digits ++;
+        }
+        while(c!='\n') {
             c = (char) getchar();
-            if(c == ' '){
-//                printf("str: ");
-//                for(int i=0;i<strlen(str);i++)
-//                    printf("%d",str[i]);
-//                printf("\n");
-                push(new_bignum(str, sign));
+            if(c == ' ' || c=='\n'){
+                push(bn);
                 break;
             }
-            if(c == '*'){
-                // todo multiply
+            if(bn->last->used == 18){
+                link* newLink = (link*) malloc(sizeof(link));
+                newLink->used =1;
+                newLink->prev = bn->last;
+                newLink->digits[bn->last->used-1] = c - '0';
+                bn->last = newLink;
+                bn->number_of_digits ++;
             }
-            if(c == '/'){
-                // todo devide
+            else{
+                bn->last->digits[bn->last->used-1] = c - '0';
+                bn->last->used ++;
+                bn->number_of_digits ++;
             }
-            if(c == '+'){
-                // todo add
-            }
-            if(c == '-'){
-                // todo subtract
-            }
-            if(c == '_'){
-                // todo minus
-            }
-            if(c == 'p'){
-                // todo print stack
-            }
-            if(c == 'c'){
-                // todo clear stack
-            }
-            if(c == 'q'){
-                // todo quit
-            }
-            t++;
-            cnt++;
+
         }
-        if(c == '\n') {
-            push(new_bignum(str, sign));
+        if(c == '\n')
             break;
-        }
     }
     printf("stack size: %d\n",s.top+1);
     while(!isEmpty()){
@@ -97,7 +107,7 @@ int main() {
     return 0;
 }
 
-void push (bignum toPush) {
+void push (bignum* toPush) {
     if (s.top == (1024 - 1))
     {
         printf ("Stack is Full\n");
@@ -110,8 +120,8 @@ void push (bignum toPush) {
     }
 }
 
-bignum pop () {
-    bignum num;
+bignum* pop () {
+    bignum *num;
     if (s.top == - 1)
     {
         printf ("ERROR: Stack is Empty!\n");
@@ -129,13 +139,18 @@ int isEmpty(){
     return s.top == -1;
 }
 
-void print_bignum(bignum bn){
-    if(*(bn.digit)>9) {
-        printf(bn.digit);
-        return;
+void print_bignum(bignum *bn){
+    link* curr = bn->head;
+    while(curr != 0) {
+        for (int i = 0; i < curr->used; i++) {
+            printf("%d", curr->digits[i]);
+        }
+        if (curr->used == 18)
+            curr = curr->next;
+        else
+            break;
     }
-    for(int i= 0; i < bn.number_of_digits; i++)
-        printf("%c",*(i+bn.digit) + '1');
+
 }
 
 void print_stack(){
@@ -149,12 +164,5 @@ void print_stack(){
         printf (" ");
     }
     printf ("\n");
-}
-
-bignum new_bignum(char* bn, char sign){
-    bignum newNum;
-    newNum.digit = bn;
-    newNum.number_of_digits = strlen(bn);
-    return newNum;
 }
 
