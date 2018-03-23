@@ -5,12 +5,12 @@ _add:
     push rbp                    ; Save caller state
     mov rbp, rsp
 
-    mov rax, [rdi+16]        ; Copy function args to registers: leftmost...
+    mov rax, [rdi+24]        ; Copy function args to registers: leftmost...
     ;mov rbx, rsi        ; Next argument...
-    
-    
+    mov rdx, [rax+20]
+    mov rax, rdx
     ;add rax,rbx         ; sum 2 arguments
-    mov dword [rbp-8], rax
+    mov [rbp-8], rax
     
     pop rbp                     ; Restore caller state
     ret

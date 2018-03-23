@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 /**
@@ -13,14 +14,14 @@ typedef struct link { // sizeof = 96 bit
     struct link * next;
     struct link * prev;
     int used;
-    int digits[18];
+    long num;
 } link;
 
 /**
- *  BIGNUM data structure for holding big integers
- *      number_of_digits: long to hold the number of digits in the big integer
- *      sign: the bit sign 0 for positive and 1 for negative
- *      head and last pointers : holding the first and last chunks of the number
+ * BIGNUM data structure for holding big integers
+ *     number_of_digits: long to hold the number of digits in the big integer
+ *     sign: the bit sign 0 for positive and 1 for negative
+ *     head and last pointers : holding the first and last chunks of the number
  */
 typedef struct bignum { // sizeof = 32 bit
     long number_of_digits;
@@ -45,7 +46,7 @@ extern int _divide (bignum*, bignum*); // todo in ASM
 
 
 /**
- * bigNum Stack
+ * bignum Stack
  *  SUPPORTED ops:
  *  * void push(@Pamram bignum* toPush); - push element into the stack
  *  * bignum*  pop(void); -pop the top element of the stack
@@ -78,25 +79,28 @@ int main() {
         bn->number_of_digits = 0;
         bn->head = (link*) malloc(sizeof(link));
         bn->head->used=0;
+        bn->head->num=0;
         bn->last = bn->head;
 
         if(c == '*'){
             continue;// todo multiply
         }
         else if(c == '/'){
-            continue;// todo devide
+            continue;// todo divide
         }
         else if(c == '+'){
-            continue;//printf("%i\n",_add(pop(),pop())); todo add
+//            printf("%i\n",_add(pop(),pop())); // todo add
         }
         else if(c == '-'){
             continue;// todo subtract
         }
         else if(c == 'p'){
             print_stack();
+            continue;
         }
         else if(c == 'c'){
             clear_stack();
+            continue;
         }
         else if(c == 'q')
             break;
@@ -105,8 +109,8 @@ int main() {
             bn->sign = 1;
         else { // if c is a number (0-9)
             bn->sign = 0;
-            bn->head->digits[0] = c - '0' ;
             bn->head->used++;
+            bn->head->num = (c - '0')+10*bn->head->num;
             bn->number_of_digits ++;
         }
         while(c!='\n') { // append digits into current bignum
@@ -119,14 +123,14 @@ int main() {
                 link* newLink = (link*) malloc(sizeof(link));
                 newLink->used =1;
                 newLink->prev = bn->last;
+                newLink->num = (c - '0');
                 bn->last->next = newLink;
-                newLink->digits[0] = c - '0';
                 bn->last = newLink;
                 bn->number_of_digits ++;
             }
             else{ // if last link has space left
-                bn->last->digits[bn->last->used] = c - '0';
                 bn->last->used ++;
+                bn->last->num = (c - '0')+10*bn->last->num;
                 bn->number_of_digits ++;
             }
 
@@ -197,9 +201,7 @@ int isEmpty(){
 void print_bignum(bignum *bn){
     link* curr = bn->head;
     while(curr != 0) {
-        for (int i = 0; i < curr->used; i++) {
-            printf("%d", curr->digits[i]);
-        }
+            printf("%li", curr->num);
         if (curr->used == 18)
             curr = curr->next;
         else
