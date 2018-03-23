@@ -3,8 +3,8 @@
 
 
 /**
- * LINK for bigNum implamtaion
- * two sides in order to mantain a connection to the rest of the links
+ * LINK for bigNum implementation
+ * two sides in order to maintain a connection to the rest of the links
  * array of integer, of size 18 to hold the number. 18 is the maximal digit number that
  * can be held in a long variable.
  * used: an integer to determine how match cells in the array are we using
@@ -17,7 +17,7 @@ typedef struct link { // sizeof = 96 bit
 } link;
 
 /**
- * BINNUM data stacture for holding big integers
+ * BIGNUM data structure for holding big integers
  * number of digits: integer to hold the number of digits in the big integer
  * sign: the bit sign 0 for positive and 1 for negative
  * head and last pointers : holding the first and last chunks of the number
@@ -31,12 +31,12 @@ typedef struct bignum { // sizeof = 32 bit
 
 
 /**
- * ****external asm function for aritmetic operations****
+ * ****external asm function for arithmetic operations****
  * SUPPORTED ops:
- * + : addition of two big integers
- * - : subtraction of two big integers
- * * : multyplication of two big integers
- * : : divition of two big integers
+ * + : addition of two numbers
+ * - : subtraction of two numbers
+ * * : multiplication of two numbers
+ * : : division of two numbers
  */
 extern int _add (bignum*, bignum*); // todo in ASM
 extern int _substract (bignum*, bignum*); // todo in ASM
@@ -107,13 +107,13 @@ int main() {
             bn->head->used++;
             bn->number_of_digits ++;
         }
-        while(c!='\n') {
+        while(c!='\n') { // append digits into current bignum
             c = (char) getchar();
             if(c == ' ' || c=='\n'){
                 push(bn);
                 break;
             }
-            if(bn->last->used == 18){
+            if(bn->last->used == 18){ // if last link is full
                 link* newLink = (link*) malloc(sizeof(link));
                 newLink->used =1;
                 newLink->prev = bn->last;
@@ -122,7 +122,7 @@ int main() {
                 bn->last = newLink;
                 bn->number_of_digits ++;
             }
-            else{
+            else{ // if last link has space left
                 bn->last->digits[bn->last->used] = c - '0';
                 bn->last->used ++;
                 bn->number_of_digits ++;
@@ -141,7 +141,7 @@ int main() {
 }
 
 /*******************************************************************
- * BIGNUM stack implantation****************************************
+ * BIGNUM stack implementation**************************************
  * *****************************************************************
  */
 
@@ -185,7 +185,7 @@ bignum* pop () {
 
 
 /**
- * isEMPTY
+ * isEmpty
  * @return 1 for stack being empty 0 otherwise
  */
 int isEmpty(){
