@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-
 
 /**
  * LINK for bignum implementation
@@ -10,11 +8,11 @@
  *     can be held in a long variable.
  *     used: an integer to determine how match cells in the array are we using
  */
-typedef struct link { // sizeof = 96 bit
+typedef struct link { // sizeof = 32 bit
     struct link * next;
     struct link * prev;
     int used;
-    long num;
+    long num; // rax+24
 } link;
 
 /**
@@ -24,13 +22,13 @@ typedef struct link { // sizeof = 96 bit
  *     head and last pointers : holding the first and last chunks of the number
  */
 typedef struct bignum { // sizeof = 32 bit
-    long number_of_digits;
+    long number_of_links;
     int sign;
     link *head;
     link *last;
 } bignum;
 
-
+void equalize_links(bignum* bn1, bignum* bn2);
 /**
  * ****external asm function for arithmetic operations****
  * SUPPORTED ops:
@@ -39,10 +37,10 @@ typedef struct bignum { // sizeof = 32 bit
  * '*' : multiplication of two numbers
  * '/' : division of two numbers
  */
-extern int _add (bignum*, bignum*); // todo in ASM
-extern int _substract (bignum*, bignum*); // todo in ASM
-extern int _multiply (bignum*, bignum*); // todo in ASM
-extern int _divide (bignum*, bignum*); // todo in ASM
+extern void _add (bignum*, bignum*);
+extern void _subtract (bignum*, bignum*); // todo in ASM
+extern bignum* _multiply (bignum*, bignum*); // todo in ASM
+extern bignum* _divide (bignum*, bignum*); // todo in ASM
 
 
 /**
@@ -76,7 +74,7 @@ int main() {
         char c;
         c = (char) getchar();
         bignum* bn= (bignum*) malloc(sizeof(bignum));
-        bn->number_of_digits = 0;
+        bn->number_of_links = 1;
         bn->head = (link*) malloc(sizeof(link));
         bn->head->used=0;
         bn->head->num=0;
@@ -89,10 +87,20 @@ int main() {
             continue;// todo divide
         }
         else if(c == '+'){
-//            printf("%i\n",_add(pop(),pop())); // todo add
+            bignum* num2 = pop();
+            bignum* num1 = pop();
+            equalize_links(num1,num2);
+            _add(num1,num2);
+            push(num1);
+            continue;
         }
         else if(c == '-'){
-            continue;// todo subtract
+            bignum* num2 = pop();
+            bignum* num1 = pop();
+            equalize_links(num1,num2);
+            _subtract(num1,num2);
+            push(num1);
+            continue;
         }
         else if(c == 'p'){
             print_stack();
@@ -111,7 +119,6 @@ int main() {
             bn->sign = 0;
             bn->head->used++;
             bn->head->num = (c - '0')+10*bn->head->num;
-            bn->number_of_digits ++;
         }
         while(c!='\n') { // append digits into current bignum
             c = (char) getchar();
@@ -126,12 +133,11 @@ int main() {
                 newLink->num = (c - '0');
                 bn->last->next = newLink;
                 bn->last = newLink;
-                bn->number_of_digits ++;
+                bn->number_of_links ++;
             }
             else{ // if last link has space left
                 bn->last->used ++;
                 bn->last->num = (c - '0')+10*bn->last->num;
-                bn->number_of_digits ++;
             }
 
         }
@@ -226,4 +232,25 @@ void print_stack(){
 void clear_stack(){
     while(!isEmpty())
         pop();
+}
+
+void equalize_links(bignum* bn1, bignum* bn2){
+    while(bn1->number_of_links > bn2->number_of_links){
+        link* newLink = (link*) malloc(sizeof(link));
+        newLink->used = 0;
+        newLink->num = 0;
+        bn2->head->prev = newLink;
+        newLink->next = bn2->head;
+        bn2->head = newLink;
+        bn2->number_of_links ++;
+    }
+    while(bn1->number_of_links < bn2->number_of_links){
+        link* newLink = (link*) malloc(sizeof(link));
+        newLink->used = 0;
+        newLink->num = 0;
+        bn1->head->prev = newLink;
+        newLink->next = bn1->head;
+        bn1->head = newLink;
+        bn1->number_of_links ++;
+    }
 }

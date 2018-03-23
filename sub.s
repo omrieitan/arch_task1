@@ -1,7 +1,7 @@
 section .text
-global _add
+global _subtract
 
-_add:
+_subtract:
     push rbp                    ; Save caller state
     mov rbp, rsp
 
@@ -12,11 +12,11 @@ _add:
     loop1:
         mov rdx, [rax+24]       ; get num of the last link
         mov r8, [rbx+24]
-        adc qword rdx, r8
+        sbb qword rdx, r8
         mov qword [rax+24], rdx
         mov rax, qword [rax+8]
         loop loop1
-        
+
     mov [rbp-8], rax
     
     pop rbp                     ; Restore caller state
