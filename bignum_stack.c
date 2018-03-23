@@ -51,12 +51,14 @@ extern int _divide (bignum*, bignum*); // todo in ASM
  *  * bignum*  pop(void); -pop the top element of the stack
  *  * int isEmpty(void); -check if the stack is empty
  *  * void print_bignum(@Pamram bignum *bn); -print the whole stack, and empty the stack
+ *  * void clear_stack(void); - pop all elements from stack
  */
 void push(bignum* toPush);
 bignum*  pop(void);
 int isEmpty(void);
 void print_bignum(bignum *bn);
 void print_stack(void);
+void clear_stack(void);
 
 struct stack {
     bignum* arr[1024];
@@ -79,26 +81,26 @@ int main() {
         bn->last = bn->head;
 
         if(c == '*'){
-            // todo multiply
+            continue;// todo multiply
         }
         else if(c == '/'){
-            // todo devide
+            continue;// todo devide
         }
         else if(c == '+'){
-            printf("%i\n",_add(pop(),pop()));
+            continue;//printf("%i\n",_add(pop(),pop())); todo add
         }
         else if(c == '-'){
-            // todo subtract
+            continue;// todo subtract
         }
         else if(c == 'p'){
-            // todo print stack
+            print_stack();
         }
         else if(c == 'c'){
-            // todo clear stack
+            clear_stack();
         }
-        else if(c == 'q'){
-            // todo quit
-        }
+        else if(c == 'q')
+            break;
+
         else if(c == '_')
             bn->sign = 1;
         else { // if c is a number (0-9)
@@ -217,4 +219,9 @@ void print_stack(){
         printf (" ");
     }
     printf ("\n");
+}
+
+void clear_stack(){
+    while(!isEmpty())
+        pop();
 }
