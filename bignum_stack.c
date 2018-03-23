@@ -12,7 +12,7 @@ typedef struct link { // sizeof = 32 bit
     struct link * next;
     struct link * prev;
     int used;
-    long num; // rax+24
+    long num;
 } link;
 
 /**
@@ -90,8 +90,18 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
-            _add(num1,num2);
-            push(num1);
+            if(num1->sign && !num2->sign) {
+                _subtract(num1, num2);
+                push(num1);
+            }
+            else if(num2->sign && !num1->sign) {
+                _subtract(num2, num1);
+                push(num2);
+            }
+            else {
+                _add(num1, num2);
+                push(num1);
+            }
             continue;
         }
         else if(c == '-'){
@@ -134,6 +144,7 @@ int main() {
                 bn->last->next = newLink;
                 bn->last = newLink;
                 bn->number_of_links ++;
+
             }
             else{ // if last link has space left
                 bn->last->used ++;
@@ -206,6 +217,8 @@ int isEmpty(){
 
 void print_bignum(bignum *bn){
     link* curr = bn->head;
+    if(bn->sign)
+        printf("-");
     while(curr != 0) {
             printf("%li", curr->num);
         if (curr->used == 18)
