@@ -3,11 +3,11 @@
 
 
 /**
- * LINK for bigNum implementation
- * two sides in order to maintain a connection to the rest of the links
- * array of integer, of size 18 to hold the number. 18 is the maximal digit number that
- * can be held in a long variable.
- * used: an integer to determine how match cells in the array are we using
+ * LINK for bignum implementation
+ *     two sides in order to maintain a connection to the rest of the links
+ *     array of integer, of size 18 to hold the number. 18 is the maximal digit number that
+ *     can be held in a long variable.
+ *     used: an integer to determine how match cells in the array are we using
  */
 typedef struct link { // sizeof = 96 bit
     struct link * next;
@@ -17,10 +17,10 @@ typedef struct link { // sizeof = 96 bit
 } link;
 
 /**
- * BIGNUM data structure for holding big integers
- * number of digits: integer to hold the number of digits in the big integer
- * sign: the bit sign 0 for positive and 1 for negative
- * head and last pointers : holding the first and last chunks of the number
+ *  BIGNUM data structure for holding big integers
+ *      number_of_digits: long to hold the number of digits in the big integer
+ *      sign: the bit sign 0 for positive and 1 for negative
+ *      head and last pointers : holding the first and last chunks of the number
  */
 typedef struct bignum { // sizeof = 32 bit
     long number_of_digits;
@@ -33,10 +33,10 @@ typedef struct bignum { // sizeof = 32 bit
 /**
  * ****external asm function for arithmetic operations****
  * SUPPORTED ops:
- * + : addition of two numbers
- * - : subtraction of two numbers
- * * : multiplication of two numbers
- * : : division of two numbers
+ * '+' : addition of two numbers
+ * '-' : subtraction of two numbers
+ * '*' : multiplication of two numbers
+ * '/' : division of two numbers
  */
 extern int _add (bignum*, bignum*); // todo in ASM
 extern int _substract (bignum*, bignum*); // todo in ASM
