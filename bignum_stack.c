@@ -29,6 +29,9 @@ typedef struct bignum { // sizeof = 32 bit
 
 void equalize_links(bignum* bn1, bignum* bn2);
 void add_carry(bignum* bn);
+void sub_borrow(bignum* bn);
+int compare_bignum(bignum* bn1, bignum* bn2);
+void subtract(bignum* num1, bignum* num2);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -88,19 +91,14 @@ int main() {
         else if(c == '+'){
             bignum* num2 = pop();
             bignum* num1 = pop();
-            printf("number of links num1 %lu\n",num1->number_of_links);
-            printf("number of links num2 %lu\n",num2->number_of_links);
-            print_bignum(num1);
             equalize_links(num1,num2);
-            printf("\n");
-            print_bignum(num1);
-            if(num1->sign && !num2->sign) {
-//                _subtract(num1, num2);
-                push(num1);
+            if(!num2->sign && num1->sign) {
+                num1->sign = 0;
+                subtract(num2, num1);
             }
-            else if(num2->sign && !num1->sign) {
-//                _subtract(num2, num1);
-                push(num2);
+            else if(!num1->sign && num2->sign) {
+                num2->sign = 0;
+                subtract(num1, num2);
             }
             else {
                 _add(num1, num2);
@@ -112,9 +110,7 @@ int main() {
         else if(c == '-'){
             bignum* num2 = pop();
             bignum* num1 = pop();
-            equalize_links(num1,num2);
-//            _subtract(num1,num2);
-            push(num1);
+            subtract(num1,num2);
             continue;
         }
         else if(c == 'p'){
@@ -214,11 +210,15 @@ int isEmpty(){
 }
 
 void print_bignum(bignum *bn){
+    int zeros = 0;
     link* curr = bn->head;
     if(bn->sign)
         printf("-");
     while(curr != 0) {
-        printf("%i", curr->num);
+        if(zeros > 0 || curr->num!=0 || curr->next == 0) {
+            printf("%i", curr->num);
+            zeros = 1;
+        }
         curr = curr->next;
     }
 
@@ -262,11 +262,61 @@ void equalize_links(bignum* bn1, bignum* bn2){
 }
 
 void add_carry(bignum* bn){
-    printf("add carry!!!");
     link* newLink = (link*) malloc(sizeof(link));
     newLink->num = 1;
     bn->head->prev = newLink;
     newLink->next = bn->head;
     bn->head = newLink;
     bn->number_of_links ++;
+}
+
+void sub_borrow(bignum* bn){
+    link* oldLink = bn->head;
+    bn->head = bn->head->next;
+    free(oldLink);
+    bn->number_of_links --;
+}
+
+int compare_bignum(bignum* bn1, bignum* bn2){
+    int ans = (int) (bn1->number_of_links - bn2->number_of_links);
+    equalize_links(bn1,bn2);
+    if (ans!=0)
+        return ans;
+    link* curr1=bn1->head;
+    link* curr2 = bn2->head;
+    while(curr1!=0 && curr1->num == curr2->num){
+        curr1 = curr1->next;
+        curr2 = curr2->next;
+    }
+    if(curr1 == 0)
+        return 0;
+    return curr1->num - curr2->num;
+
+}
+
+void subtract(bignum* num1, bignum* num2){
+    int comp = compare_bignum(num1,num2);
+    printf("comp: %i\n",comp);
+    if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
+        printf("if1\n");
+        _subtract(num1, num2);
+        push(num1);
+    }
+    else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
+        printf("if2\n");
+        _subtract(num2, num1);
+        num2->sign = 1;
+        push(num2);
+    }
+    else if(num1->sign ^ num2->sign){ // 3 4 5 8
+        printf("if3\n");
+        _add(num1, num2);
+        push(num1);
+    }
+    else if(comp == 0){
+        printf("if4\n");
+        _subtract(num1, num2);
+        num1->sign = 0;
+        push(num1);
+    }
 }
