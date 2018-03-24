@@ -28,6 +28,8 @@ typedef struct bignum { // sizeof = 32 bit
 } bignum;
 
 void equalize_links(bignum* bn1, bignum* bn2);
+void add_carry(bignum* bn);
+
 /**
  * ****external asm function for arithmetic operations****
  * SUPPORTED ops:
@@ -97,8 +99,12 @@ int main() {
                 push(num2);
             }
             else {
-//                _add(num1, num2);
+                print_bignum(num1);
+                _add(num1, num2);
                 push(num1);
+                printf("\n");
+                print_bignum(num1);
+                printf("\n");
             }
             continue;
         }
@@ -251,3 +257,12 @@ void equalize_links(bignum* bn1, bignum* bn2){
     }
 }
 
+void add_carry(bignum* bn){
+    printf("add carry!!!");
+    link* newLink = (link*) malloc(sizeof(link));
+    newLink->num = 1;
+    bn->head->prev = newLink;
+    newLink->next = bn->head;
+    bn->head = newLink;
+    bn->number_of_links ++;
+}
