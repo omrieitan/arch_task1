@@ -77,7 +77,6 @@ int main() {
         bignum* bn= (bignum*) malloc(sizeof(bignum));
         bn->number_of_links = 1;
         bn->head = (link*) malloc(sizeof(link));
-        bn->head->num=0;
         bn->last = bn->head;
 
         if(c == '*'){
@@ -89,7 +88,12 @@ int main() {
         else if(c == '+'){
             bignum* num2 = pop();
             bignum* num1 = pop();
+            printf("number of links num1 %lu\n",num1->number_of_links);
+            printf("number of links num2 %lu\n",num2->number_of_links);
+            print_bignum(num1);
             equalize_links(num1,num2);
+            printf("\n");
+            print_bignum(num1);
             if(num1->sign && !num2->sign) {
 //                _subtract(num1, num2);
                 push(num1);
@@ -99,12 +103,9 @@ int main() {
                 push(num2);
             }
             else {
-                print_bignum(num1);
                 _add(num1, num2);
                 push(num1);
-                printf("\n");
-                print_bignum(num1);
-                printf("\n");
+
             }
             continue;
         }
@@ -127,8 +128,11 @@ int main() {
         else if(c == 'q')
             break;
 
-        else if(c == '_')
+        else if(c == '_') {
             bn->sign = 1;
+            c = (char) getchar();
+            bn->head->num = (c - '0');
+        }
         else { // if c is a number (0-9)
             bn->sign = 0;
             bn->head->num = (c - '0');
