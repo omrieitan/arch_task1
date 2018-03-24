@@ -8,11 +8,10 @@
  *     can be held in a long variable.
  *     used: an integer to determine how match cells in the array are we using
  */
-typedef struct link { // sizeof = 32 bit
+typedef struct link { // sizeof = 24 bit
     struct link * next;
     struct link * prev;
-    int used;
-    long num;
+    int num;
 } link;
 
 /**
@@ -76,7 +75,6 @@ int main() {
         bignum* bn= (bignum*) malloc(sizeof(bignum));
         bn->number_of_links = 1;
         bn->head = (link*) malloc(sizeof(link));
-        bn->head->used=0;
         bn->head->num=0;
         bn->last = bn->head;
 
@@ -91,15 +89,15 @@ int main() {
             bignum* num1 = pop();
             equalize_links(num1,num2);
             if(num1->sign && !num2->sign) {
-                _subtract(num1, num2);
+//                _subtract(num1, num2);
                 push(num1);
             }
             else if(num2->sign && !num1->sign) {
-                _subtract(num2, num1);
+//                _subtract(num2, num1);
                 push(num2);
             }
             else {
-                _add(num1, num2);
+//                _add(num1, num2);
                 push(num1);
             }
             continue;
@@ -108,7 +106,7 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
-            _subtract(num1,num2);
+//            _subtract(num1,num2);
             push(num1);
             continue;
         }
@@ -127,8 +125,7 @@ int main() {
             bn->sign = 1;
         else { // if c is a number (0-9)
             bn->sign = 0;
-            bn->head->used++;
-            bn->head->num = (c - '0')+10*bn->head->num;
+            bn->head->num = (c - '0');
         }
         while(c!='\n') { // append digits into current bignum
             c = (char) getchar();
@@ -136,21 +133,12 @@ int main() {
                 push(bn);
                 break;
             }
-            if(bn->last->used == 18){ // if last link is full
-                link* newLink = (link*) malloc(sizeof(link));
-                newLink->used =1;
-                newLink->prev = bn->last;
-                newLink->num = (c - '0');
-                bn->last->next = newLink;
-                bn->last = newLink;
-                bn->number_of_links ++;
-
-            }
-            else{ // if last link has space left
-                bn->last->used ++;
-                bn->last->num = (c - '0')+10*bn->last->num;
-            }
-
+            link* newLink = (link*) malloc(sizeof(link));
+            newLink->prev = bn->last;
+            newLink->num = (c - '0');
+            bn->last->next = newLink;
+            bn->last = newLink;
+            bn->number_of_links ++;
         }
         if(c == '\n')
             break;
@@ -220,11 +208,8 @@ void print_bignum(bignum *bn){
     if(bn->sign)
         printf("-");
     while(curr != 0) {
-            printf("%li", curr->num);
-        if (curr->used == 18)
-            curr = curr->next;
-        else
-            break;
+        printf("%i", curr->num);
+        curr = curr->next;
     }
 
 }
@@ -250,7 +235,6 @@ void clear_stack(){
 void equalize_links(bignum* bn1, bignum* bn2){
     while(bn1->number_of_links > bn2->number_of_links){
         link* newLink = (link*) malloc(sizeof(link));
-        newLink->used = 0;
         newLink->num = 0;
         bn2->head->prev = newLink;
         newLink->next = bn2->head;
@@ -259,7 +243,6 @@ void equalize_links(bignum* bn1, bignum* bn2){
     }
     while(bn1->number_of_links < bn2->number_of_links){
         link* newLink = (link*) malloc(sizeof(link));
-        newLink->used = 0;
         newLink->num = 0;
         bn1->head->prev = newLink;
         newLink->next = bn1->head;
@@ -267,3 +250,4 @@ void equalize_links(bignum* bn1, bignum* bn2){
         bn1->number_of_links ++;
     }
 }
+

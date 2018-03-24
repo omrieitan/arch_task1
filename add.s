@@ -14,10 +14,12 @@ _add:
         mov r8, [rbx+24]
         adc qword rdx, r8
         mov qword [rax+24], rdx
-        mov rax, qword [rax+8]
+
+        mov rax, qword [rax+8] ;move to next link
+	mov rbx, qword [rbx+8]
         loop loop1
-        
+
     mov [rbp-8], rax
-    
+
     pop rbp                     ; Restore caller state
     ret
