@@ -3,16 +3,16 @@ global _add
 extern add_carry
 
 _add:
-    push rbp                    ; Save caller state
+    push rbp                    	 ; Save caller state
     mov rbp, rsp
 
-    mov rax, [rdi+24]        ; Copy function args to registers: leftmost...
-    mov rbx, [rsi+24]        ; Next argument...
-    mov rcx, [rdi]           ; get counter
+    mov rax, [rdi+24]       		 ; Copy function args to registers: leftmost...
+    mov rbx, [rsi+24]       		 ; Next argument...
+    mov rcx, [rdi]          		 ; get counter
     mov r9, 0
     
     loop1:
-        mov rdx, [rax+16]       ; get num of the last link
+        mov rdx, [rax+16]       	; get num of the last link
         mov r8, [rbx+16]
         add r8, r9
         add qword rdx, r8
@@ -29,7 +29,7 @@ _add:
         
         next:
         mov qword [rax+16], rdx
-        mov rax, qword [rax+8] ;move to next link
+        mov rax, qword [rax+8] 		;move to next link
 	mov rbx, qword [rbx+8]
         loop loop1
         
@@ -42,5 +42,5 @@ _add:
     end_add:
     mov [rbp-8], rax
 
-    pop rbp                     ; Restore caller state
+    pop rbp                     	; Restore caller state
     ret
