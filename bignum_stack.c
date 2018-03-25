@@ -42,8 +42,8 @@ void subtract(bignum* num1, bignum* num2);
  * '/' : division of two numbers
  */
 extern void _add (bignum*, bignum*);
-extern void _subtract (bignum*, bignum*); // todo in ASM
-extern bignum* _multiply (bignum*, bignum*); // todo in ASM
+extern void _subtract (bignum*, bignum*);
+extern bignum* _multiply (bignum*, bignum*,bignum*); // todo in ASM
 extern bignum* _divide (bignum*, bignum*); // todo in ASM
 
 
@@ -83,6 +83,15 @@ int main() {
         bn->last = bn->head;
 
         if(c == '*'){
+            bignum* num2 = pop();
+            bignum* num1 = pop();
+            bignum* result= (bignum*) malloc(sizeof(bignum));
+            result->number_of_links = 1;
+            result->head = (link*) malloc(sizeof(link));
+            result->last = result->head;
+            result->last->num = 0;
+            _multiply (num1, num2,result);
+            push(result);
             continue;// todo multiply
         }
         else if(c == '/'){
@@ -149,7 +158,7 @@ int main() {
         if(c == '\n')
             break;
     }
-    printf("stack size: %d\n",s.top+1);
+//    printf("stack size: %d\n",s.top+1);
     while(!isEmpty()){
         print_stack();
         pop();
@@ -229,10 +238,13 @@ void print_stack(){
         printf("Stack is Empty.\n");
         return;
     }
-    printf ("elements in stack: ");
     for(int i=s.top; i>=0; i--) {
-        print_bignum(s.arr[i]);
-        printf (" ");
+        if(i==0)
+            print_bignum(s.arr[i]);
+        else{
+            print_bignum(s.arr[i]);
+            printf (" ");
+        }
     }
     printf ("\n");
 }
@@ -296,25 +308,20 @@ int compare_bignum(bignum* bn1, bignum* bn2){
 
 void subtract(bignum* num1, bignum* num2){
     int comp = compare_bignum(num1,num2);
-    printf("comp: %i\n",comp);
     if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
-        printf("if1\n");
         _subtract(num1, num2);
         push(num1);
     }
     else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
-        printf("if2\n");
         _subtract(num2, num1);
         num2->sign = 1;
         push(num2);
     }
     else if(num1->sign ^ num2->sign){ // 3 4 5 8
-        printf("if3\n");
         _add(num1, num2);
         push(num1);
     }
     else if(comp == 0){
-        printf("if4\n");
         _subtract(num1, num2);
         num1->sign = 0;
         push(num1);
