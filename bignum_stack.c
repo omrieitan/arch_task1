@@ -43,8 +43,8 @@ void subtract(bignum* num1, bignum* num2);
  */
 extern void _add (bignum*, bignum*);
 extern void _subtract (bignum*, bignum*);
-extern bignum* _multiply (bignum*, bignum*,bignum*); // todo in ASM
-extern bignum* _divide (bignum*, bignum*); // todo in ASM
+extern void _multiply (bignum*, bignum*,bignum*); // todo in ASM
+extern void _divide (bignum*, bignum*); // todo in ASM
 
 
 /**
@@ -314,7 +314,7 @@ void subtract(bignum* num1, bignum* num2){
     }
     else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
         _subtract(num2, num1);
-        num2->sign = 1;
+        num2->sign = 1 - num2->sign; // if =1 change to 0 , if =0 change to 1
         push(num2);
     }
     else if(num1->sign ^ num2->sign){ // 3 4 5 8
