@@ -16,11 +16,17 @@ _multiply:
     
     
     main_loop:
-        mov bl, [rax+16]
-        mov al, [rbx+16]
-        mul bl
-        mov [r8+12], ax
-        call printf
+        mov ax, [rax+16]
+        mov cx, [rbx+16]
+        mul cx
+        mov [r8+16], ax
+        ;cmp qword rdx, 10
+        ;jge mul_carry
+        
+        mul_carry:
+           ; mov ax, 10
+           ; div cx
+           ; mov [r8+16], cx
         
     mov [rbp-8], rax
 

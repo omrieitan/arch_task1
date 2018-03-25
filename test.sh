@@ -2,6 +2,7 @@
 
 echo -e "\e[1m_________STARTING TEST_________\e[0m"
 echo ""
+echo -e "\e[1m+ OPERATION_________\e[0m"
 NUM1="$(( ( $RANDOM % 100 )  + 1 ))"
 NUM2="$(( ( $RANDOM % 100 )  + 1 ))"
 echo "test $NUM1 + $NUM2 ="
