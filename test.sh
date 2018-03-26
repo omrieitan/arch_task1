@@ -87,7 +87,10 @@ do
 ARG="$(bignum) $(bignum) $(rand_sign)"
 for ((number=1;number < $(( ( $RANDOM % 20 )  + 1 ));number++))
     {
-        ARG+=" $(bignum) $(rand_sign)"
+    if [ $(($RANDOM%2)) == 1 ];
+        then ARG+=" $(bignum) $(rand_sign)"
+        else ARG+=" $(bignum) $(bignum) $(rand_sign) $(rand_sign)"
+    fi
     }
 echo "test$counter: $ARG"
     TEST="$($PATH_TO_PROGRAM <<< $ARG)"
