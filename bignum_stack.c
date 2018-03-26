@@ -32,6 +32,7 @@ void add_carry(bignum* bn);
 void sub_borrow(bignum* bn);
 int compare_bignum(bignum* bn1, bignum* bn2);
 void subtract(bignum* num1, bignum* num2);
+//void free_bigNum(bignum * bn);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -77,6 +78,8 @@ int main() {
     while(1) {
         char c;
         c = (char) getchar();
+        if(c == ' ')
+            continue;
         bignum* bn= (bignum*) malloc(sizeof(bignum));
         bn->number_of_links = 1;
         bn->head = (link*) malloc(sizeof(link));
@@ -92,6 +95,8 @@ int main() {
             result->last->num = 0;
             _multiply (num1, num2,result);
             push(result);
+//            free_bigNum(num1);
+//            free_bigNum(num2);
             continue;// todo multiply
         }
         else if(c == '/'){
@@ -112,7 +117,7 @@ int main() {
             else {
                 _add(num1, num2);
                 push(num1);
-
+//                free_bigNum(num2);
             }
             continue;
         }
@@ -120,6 +125,7 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             subtract(num1,num2);
+
             continue;
         }
         else if(c == 'p'){
@@ -158,7 +164,6 @@ int main() {
         if(c == '\n')
             break;
     }
-//    printf("stack size: %d\n",s.top+1);
     while(!isEmpty()){
         print_stack();
         pop();
@@ -204,6 +209,7 @@ bignum* pop () {
     else
     {
         num = s.arr[s.top];
+        s.arr[s.top]=0;
         s.top = s.top - 1;
     }
     return(num);
@@ -311,19 +317,34 @@ void subtract(bignum* num1, bignum* num2){
     if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
         _subtract(num1, num2);
         push(num1);
+//        free_bigNum(num2);
     }
     else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
         _subtract(num2, num1);
         num2->sign = 1 - num2->sign; // if =1 change to 0 , if =0 change to 1
         push(num2);
+//        free_bigNum(num1);
     }
     else if(num1->sign ^ num2->sign){ // 3 4 5 8
         _add(num1, num2);
         push(num1);
+//        free_bigNum(num2);
     }
     else if(comp == 0){
         _subtract(num1, num2);
         num1->sign = 0;
         push(num1);
+//        free_bigNum(num2);
     }
 }
+
+//void free_bigNum(bignum * bn){
+//    link *curr = bn->last;
+//    link *temp = bn->last;
+//    while(curr!=0){
+//        temp=curr;
+//        curr=curr->prev;
+//        free(temp);
+//    }
+//    free(bn);
+//}

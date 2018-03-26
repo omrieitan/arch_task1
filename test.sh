@@ -3,8 +3,7 @@
 MUN_OF_TESTS=10
 NUM_OF_TESTS_FAILED=0
 
-function bignum()
-{
+function bignum(){
     local  num=""
     if [ $(($RANDOM%2)) == 1 ];
         then num="_"
