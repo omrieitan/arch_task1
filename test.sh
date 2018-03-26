@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MUN_OF_TESTS=10
-NUM_OF_TESTS_FAILED=0
+PATH_TO_PROGRAM="./bin/calc"
 
 function bignum(){
     local  num=""
@@ -24,11 +24,13 @@ if [ $(($RANDOM%2)) == 1 ];
     echo $sign
 }
 
+
 echo -e "\e[1m_________TASK1 TEST_________\e[0m"
 echo ""
+NUM_OF_TESTS_FAILED=0
 
+{ # add test
 echo -e "\e[1mADD OPERATION_________\e[0m"
-
 counter=1
 while [ $counter -le $MUN_OF_TESTS ]
 do
@@ -36,7 +38,7 @@ do
     NUM2=$(bignum)
     
     echo "test$counter: $NUM1 + $NUM2 ="
-    TEST="$(./bin/calc <<< $NUM1' '$NUM2' +')"
+    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' +')"
     CORRECT="$(dc <<< $NUM1' '$NUM2' +pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -50,10 +52,10 @@ do
     fi
     ((counter++))
 done
-
+}
+{ # sub test
 echo ""
 echo -e "\e[1mSUB OPERATION_________\e[0m"
-
 counter=1
 while [ $counter -le $MUN_OF_TESTS ]
 do
@@ -61,7 +63,7 @@ do
     NUM2=$(bignum)
     
     echo "test$counter: $NUM1 - $NUM2 ="
-    TEST="$(./bin/calc <<< $NUM1' '$NUM2' -')"
+    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' -')"
     CORRECT="$(dc <<< $NUM1' '$NUM2' -pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -75,17 +77,20 @@ do
     fi
     ((counter++))
 done
-
+}
+{ # add&sub test
 echo ""
 echo -e "\e[1mADD&SUB OPERATIONS_____\e[0m"
-
+counter=1
+while [ $counter -le $MUN_OF_TESTS ]
+do
 ARG="$(bignum) $(bignum) $(rand_sign)"
 for ((number=1;number < $(( ( $RANDOM % 20 )  + 1 ));number++))
     {
         ARG+=" $(bignum) $(rand_sign)"
     }
 echo "test$counter: $ARG"
-    TEST="$(./bin/calc <<< $ARG)"
+    TEST="$($PATH_TO_PROGRAM <<< $ARG)"
     CORRECT="$(dc <<< $ARG' pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -97,7 +102,9 @@ echo "test$counter: $ARG"
         else
         echo -e "\e[92mPASSED\e[39m"
     fi
-
+    ((counter++))
+done
+}
 
 if [ "$NUM_OF_TESTS_FAILED" == 0 ];
     then
