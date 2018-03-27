@@ -32,7 +32,7 @@ void add_carry(bignum* bn);
 void sub_borrow(bignum* bn);
 int compare_bignum(bignum* bn1, bignum* bn2);
 void subtract(bignum* num1, bignum* num2);
-//void free_bigNum(bignum * bn);
+void free_bigNum(bignum * bn);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -338,13 +338,13 @@ void subtract(bignum* num1, bignum* num2){
     }
 }
 
-//void free_bigNum(bignum * bn){
-//    link *curr = bn->last;
-//    link *temp = bn->last;
-//    while(curr!=0){
-//        temp=curr;
-//        curr=curr->prev;
-//        free(temp);
-//    }
-//    free(bn);
-//}
+void free_bigNum(bignum * bn){
+    link *curr = bn->last;
+    link *temp = bn->last;
+    while(curr!=0){
+        temp=curr;
+        curr=curr->prev;
+        free(temp);
+    }
+    free(bn);
+}
