@@ -34,7 +34,7 @@ _multiply:
 
 	get_next_digit:
 	    mov rax, qword [rax+8]	;get next link of first number
-	    mov r8, qword [r8+8]	;get next link of result number
+	   ; mov r8, qword [r8w+8]	;get next link of result number
  
 	dec r12
 	cmp r12,0

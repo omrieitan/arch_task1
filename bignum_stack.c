@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <math.h>
 /**
  * LINK for bignum implementation
  *     two sides in order to maintain a connection to the rest of the links
@@ -33,6 +33,7 @@ void sub_borrow(bignum* bn);
 int compare_bignum(bignum* bn1, bignum* bn2);
 void subtract(bignum* num1, bignum* num2);
 void free_bigNum(bignum * bn);
+bignum* init_mul_result(long length_num1,long length_num2);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -88,11 +89,7 @@ int main() {
         if(c == '*'){
             bignum* num2 = pop();
             bignum* num1 = pop();
-            bignum* result= (bignum*) malloc(sizeof(bignum));
-            result->number_of_links = 1;
-            result->head = (link*) malloc(sizeof(link));
-            result->last = result->head;
-            result->last->num = 0;
+            bignum* result= init_mul_result(num1->number_of_links,num2->number_of_links);
             _multiply (num1, num2,result);
             push(result);
 //            free_bigNum(num1);
@@ -117,7 +114,7 @@ int main() {
             else {
                 _add(num1, num2);
                 push(num1);
-//                free_bigNum(num2);
+  //              free_bigNum(num2);
             }
             continue;
         }
@@ -323,7 +320,7 @@ void subtract(bignum* num1, bignum* num2){
         _subtract(num2, num1);
         num2->sign = 1 - num2->sign; // if =1 change to 0 , if =0 change to 1
         push(num2);
-//        free_bigNum(num1);
+ //       free_bigNum(num1);
     }
     else if(num1->sign ^ num2->sign){ // 3 4 5 8
         _add(num1, num2);
@@ -346,5 +343,22 @@ void free_bigNum(bignum * bn){
         curr=curr->prev;
         free(temp);
     }
-    free(bn);
+ //   free(bn);
+}
+
+bignum* init_mul_result(long length_num1,long length_num2){
+    long length=((length_num1>=length_num2) ? length_num1 : length_num2)*2;
+    bignum* result= (bignum*) malloc(sizeof(bignum));
+    result->number_of_links = length;
+    result->head = (link*) malloc(sizeof(link));
+    result->last = result->head;
+    result->last->num = 0;
+    for(int i=0; i<length;i++){
+        link* newLink = (link*) malloc(sizeof(link));
+        newLink->num = 0;
+        newLink->prev = result->last;
+        result->last->next = newLink;
+        result->last = newLink;
+    }
+    return result;
 }
