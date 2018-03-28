@@ -23,88 +23,116 @@ _multiply:
     mov result_curr, [rdx+24]
     mov links_count1, [rdi]           		; number of links of num1
     mov links_count2, [rsi]           		; number of links of num2
-    xor add_carry, add_carry
-    xor mul_carry, mul_carry
+    mov add_carry, 0
+    mov mul_carry, 0
     
-    main_loop:
+
+    num2_loop:
+        mov digit2, [num2_ptr+16]		;get the number from the link of the secound number
     
-    inner_loop:
-        
-        continue_calc:
+        num1_loop:
             mov digit1, [num1_ptr+16]		;get the number from the link of the first number
-            mov digit2, [num2_ptr+16]		;get the number from the link of the secound number
-            mul digit2  	      		;digit1=digit1*digit2
-            add digit1, mul_carry    		;add previus mul carry            
-            
-            add qword [result_ptr+16], digit1   ;add resualt in result num
-            add qword [result_ptr+16], add_carry
-            xor add_carry, add_carry
-            
-            cmp qword [result_ptr+16], 10
-            jge has_add_carry
-            
-            no_add_carry:
-            cmp digit1, 10		        ;check if there is a carry from the mul op
-            jge has_mul_carry
-            jmp get_next_digit1            
-
-        has_mul_carry:
-            mov rcx, 10
-	    idiv rcx 	       		        ;digit1=digit1/digit2, remeinder in rdx
-            add [result_ptr+16], rdx     	;store resualt in result num
-            mov mul_carry, digit1         	;save mul carry into mul_carry
-
-	get_next_digit1:
-	    mov num1_ptr, qword [num1_ptr+8]	;get next link of first number
-	    mov result_ptr, qword [result_ptr+8];get next link of result number
-
-	    
-        end_of_number_check:
-        cmp num1_ptr,0
-        je inner_end
-        jmp go_back
+            mul digit2
+            add digit1,mul_carry
+            mov mul_carry, 0
+            cmp digit1,10
+            jge mul_carry_handle
+            jmp insert_new_digit
         
-        go_back:
+        get_next_num1_digit:
+            mov num1_ptr, qword [num1_ptr+8]	;get next link of first number
+	    mov result_ptr, qword [result_ptr+8];get next link of result number
+	    jmp end_of_num1_check
+	    
+        end_of_num1_check:
+            cmp num1_ptr,0
+            je handle_end_of_num1
+            jmp num1_loop_end
+            
+    
+        num1_loop_end:
             dec links_count1
             cmp links_count1,0
-            jnz inner_loop
-	     
-        inner_end:
-            add qword [result_ptr+16], mul_carry
-            cmp qword [result_ptr+16], 10
-            jge inner_end_carry
-            jmp get_next_digit2
+            jnz num1_loop
+    
+    
+    num2_loop_end:
+        mov num2_ptr, qword[num2_ptr+8]
+        cmp num2_ptr, 0 
+        je handle_end_of_num2
+        jmp prepere_for_next_iteration
         
-        inner_end_carry:
-            sub qword [result_ptr+16], 10
-            mov result_ptr, [result_ptr+8]
-            add qword [result_ptr+16], 1
-
-            
-    get_next_digit2:
         
-        end_of_number2_check:
-            mov num2_ptr, qword [num2_ptr+8]
-            cmp num2_ptr,0
-            je end
-        
+    prepere_for_next_iteration:
         mov qword num1_ptr, [rdi+24]
         mov result_curr, [result_curr+8]
         mov result_ptr, result_curr
-        xor mul_carry, mul_carry                    ; mul carry = 0
-        xor add_carry, add_carry
+        mov mul_carry, 0                    ; mul carry = 0
+        mov add_carry, 0
         mov links_count1, [rdi]                     ; reset links_count1
-    
+
         dec links_count2
         cmp links_count2,0
-        jnz main_loop
+        jnz num2_loop
         jmp end
         
-    has_add_carry:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;functions;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+        
+    insert_new_digit:
+        add qword [result_ptr+16], digit1
+        add qword [result_ptr+16], add_carry
+        mov add_carry, 0
+        cmp qword [result_ptr+16], 10
+        jge add_carry_handle 
+        jmp get_next_num1_digit
+        
+        
+    handle_end_of_num1:
+        add qword [result_ptr+16], mul_carry
+        cmp qword [result_ptr+16], 10
+        jge add_one_at_the_end
+        jmp num1_loop_end
+        
+    
+    mul_carry_handle:
+        mov rcx, 10
+        idiv rcx
+        add [result_ptr+16], rdx
+        mov mul_carry, digit1
+        cmp qword [result_ptr+16], 10
+        jge add_carry_handle
+        jmp get_next_num1_digit
+    
+    add_carry_handle:
         sub qword [result_ptr+16], 10
         mov add_carry, 1
-        jmp no_add_carry
-    
+        jmp get_next_num1_digit
+        
+    add_one_at_the_end:
+        mov result_ptr, qword [result_ptr+8]
+        add qword [result_ptr+16], 1
+        mov result_ptr, qword[result_ptr]
+        jmp num1_loop_end
+        
+    add_one_at_the_end_and_exit:
+        mov result_ptr, qword [result_ptr+8]
+        add qword [result_ptr+16], 1
+        jmp end
+        
+    handle_end_of_num2:
+        add qword [result_ptr+16], mul_carry
+        cmp qword [result_ptr+16], 10
+        jge add_one_at_the_end_and_exit
+        jmp end
+        
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;END;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+                
     
     end:
     mov [rbp-8], digit1
