@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+
 /**
  * LINK for bignum implementation
  *     two sides in order to maintain a connection to the rest of the links
@@ -90,6 +90,7 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             bignum* result= init_mul_result(num1->number_of_links,num2->number_of_links);
+            equalize_links(num1,num2);
             _multiply (num1, num2,result);
             push(result);
 //            free_bigNum(num1);
