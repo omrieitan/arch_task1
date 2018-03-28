@@ -23,7 +23,8 @@ _multiply:
     mov links_count1, [rdi]           		; number of links of num1
     mov links_count2, [rsi]           		; number of links of num2
     mov result_curr, result_ptr
-    xor add_carry,add_carry
+    xor add_carry, add_carry
+    xor mul_carry, mul_carry
     
     main_loop:
     
@@ -36,6 +37,9 @@ _multiply:
             add digit1, mul_carry    		;add previus mul carry            
             
             add qword [result_ptr+16], digit1   ;add resualt in result num
+            add qword [result_ptr+16], add_carry
+            xor add_carry, add_carry
+            
             cmp qword [result_ptr+16], 10
             jge has_add_carry
             
@@ -46,10 +50,9 @@ _multiply:
 
         has_mul_carry:
             mov rcx, 10
-	    idiv rcx 	       		;digit1=digit1/digit2, remeinder in rdx
+	    idiv rcx 	       		        ;digit1=digit1/digit2, remeinder in rdx
             mov [result_ptr+16], rdx     	;store resualt in result num
             mov mul_carry, digit1         	;save mul carry into mul_carry
-	    jmp get_next_digit1
 
 	get_next_digit1:
 	    mov num1_ptr, qword [num1_ptr+8]	;get next link of first number
@@ -72,11 +75,10 @@ _multiply:
     get_next_digit2:
         
         end_of_number2_check:
+            mov num2_ptr, qword [num2_ptr+8]
             cmp num2_ptr,0
             je end
         
-        
-        mov num2_ptr, qword [num2_ptr+8]
         mov qword num1_ptr, [rdi+24]
         mov result_curr, [result_curr+8]
         mov result_ptr, result_curr
