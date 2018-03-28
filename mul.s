@@ -60,7 +60,7 @@ _multiply:
         mov num2_ptr, qword[num2_ptr+8]
         cmp num2_ptr, 0 
         je handle_end_of_num2                   ; check if we have reached the end of num2
-        jmp prepere_for_next_iteration`         ; if not, prepere for next iteration
+        jmp prepere_for_next_iteration          ; if not, prepere for next iteration
         
     prepere_for_next_iteration:
         mov qword num1_ptr, [rdi+24]            ; reset num1 to first digit
