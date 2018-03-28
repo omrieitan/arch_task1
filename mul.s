@@ -20,9 +20,9 @@ _multiply:
     mov qword num1_ptr, [rdi+24]      	        ; get num1
     mov num2_ptr, [rsi+24]        		; get num2
     mov result_ptr, [rdx+24]         		; get result
+    mov result_curr, [rdx+24]
     mov links_count1, [rdi]           		; number of links of num1
     mov links_count2, [rsi]           		; number of links of num2
-    mov result_curr, result_ptr
     xor add_carry, add_carry
     xor mul_carry, mul_carry
     
@@ -51,7 +51,7 @@ _multiply:
         has_mul_carry:
             mov rcx, 10
 	    idiv rcx 	       		        ;digit1=digit1/digit2, remeinder in rdx
-            mov [result_ptr+16], rdx     	;store resualt in result num
+            add [result_ptr+16], rdx     	;store resualt in result num
             mov mul_carry, digit1         	;save mul carry into mul_carry
 
 	get_next_digit1:
@@ -70,8 +70,17 @@ _multiply:
             jnz inner_loop
 	     
         inner_end:
-            mov qword [result_ptr+16], mul_carry
-    
+            add qword [result_ptr+16], mul_carry
+            cmp qword [result_ptr+16], 10
+            jge inner_end_carry
+            jmp get_next_digit2
+        
+        inner_end_carry:
+            sub qword [result_ptr+16], 10
+            mov result_ptr, [result_ptr+8]
+            add qword [result_ptr+16], 1
+
+            
     get_next_digit2:
         
         end_of_number2_check:
@@ -83,6 +92,7 @@ _multiply:
         mov result_curr, [result_curr+8]
         mov result_ptr, result_curr
         xor mul_carry, mul_carry                    ; mul carry = 0
+        xor add_carry, add_carry
         mov links_count1, [rdi]                     ; reset links_count1
     
         dec links_count2
