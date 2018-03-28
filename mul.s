@@ -36,42 +36,41 @@ _multiply:
             add digit1,mul_carry
             mov mul_carry, 0
             cmp digit1,10
-            jge mul_carry_handle
-            jmp insert_new_digit
+            jge mul_carry_handle                ; carry -> handle the addition of the carry
+            jmp insert_new_digit                ; no carry -> add addtion carry and mul resualt, and add to resulat
         
         get_next_num1_digit:
-            mov num1_ptr, qword [num1_ptr+8]	;get next link of first number
-	    mov result_ptr, qword [result_ptr+8];get next link of result number
+            mov num1_ptr, qword [num1_ptr+8]	; get next link of first number
+	    mov result_ptr, qword [result_ptr+8]; get next link of result number
 	    jmp end_of_num1_check
 	    
-        end_of_num1_check:
-            cmp num1_ptr,0
-            je handle_end_of_num1
+        end_of_num1_check:                      ; reached the end of iteration over num1
+            cmp num1_ptr,0                      
+            je handle_end_of_num1               ; call fucntion to handle the case were we need to add a add/mull carry
             jmp num1_loop_end
             
     
-        num1_loop_end:
-            dec links_count1
+        num1_loop_end:                          ; decreasing counters
+            dec links_count1                    
             cmp links_count1,0
             jnz num1_loop
     
     
-    num2_loop_end:
+    num2_loop_end:                              ; prepere next digit of num2
         mov num2_ptr, qword[num2_ptr+8]
         cmp num2_ptr, 0 
-        je handle_end_of_num2
-        jmp prepere_for_next_iteration
-        
+        je handle_end_of_num2                   ; check if we have reached the end of num2
+        jmp prepere_for_next_iteration`         ; if not, prepere for next iteration
         
     prepere_for_next_iteration:
-        mov qword num1_ptr, [rdi+24]
-        mov result_curr, [result_curr+8]
-        mov result_ptr, result_curr
-        mov mul_carry, 0                    ; mul carry = 0
-        mov add_carry, 0
-        mov links_count1, [rdi]                     ; reset links_count1
+        mov qword num1_ptr, [rdi+24]            ; reset num1 to first digit
+        mov result_curr, [result_curr+8]        ; start add from the next digit
+        mov result_ptr, result_curr             ; get new starting digit for addtion
+        mov mul_carry, 0                        ; mul carry = 0
+        mov add_carry, 0                        ; add carry = 0
+        mov links_count1, [rdi]                 ; reset links_count1
 
-        dec links_count2
+        dec links_count2                        ; decreasing counters
         cmp links_count2,0
         jnz num2_loop
         jmp end
