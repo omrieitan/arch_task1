@@ -79,7 +79,7 @@ int main() {
     while(1) {
         char c;
         c = (char) getchar();
-        if(c == ' ')
+        if(c == ' ' || c == '\n')
             continue;
         bignum* bn= (bignum*) malloc(sizeof(bignum));
         bn->number_of_links = 1;
@@ -129,7 +129,8 @@ int main() {
             continue;
         }
         else if(c == 'p'){
-            print_stack();
+            print_bignum(s.arr[s.top]);
+            printf("\n");
             continue;
         }
         else if(c == 'c'){
@@ -148,7 +149,7 @@ int main() {
             bn->sign = 0;
             bn->head->num = (c - '0');
         }
-        while(c!='\n') { // append digits into current bignum
+        while(c!='q') { // append digits into current bignum
             c = (char) getchar();
             if(c == ' ' || c=='\n'){
                 push(bn);
@@ -161,12 +162,8 @@ int main() {
             bn->last = newLink;
             bn->number_of_links ++;
         }
-        if(c == '\n')
+        if(c == 'q')
             break;
-    }
-    while(!isEmpty()){
-        print_stack();
-        pop();
     }
     return 0;
 }

@@ -99,7 +99,7 @@ do
     NUM2=$(bignum)
     
     echo -e "\e[4mtest$counter\e[0m: $NUM1 + $NUM2 ="
-    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' +')"
+    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' + p q')"
     CORRECT="$(dc <<< $NUM1' '$NUM2' +pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -126,7 +126,7 @@ do
     NUM2=$(bignum)
     
     echo -e "\e[4mtest$counter\e[0m: $NUM1 - $NUM2 ="
-    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' -')"
+    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' - p q')"
     CORRECT="$(dc <<< $NUM1' '$NUM2' -pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -157,7 +157,7 @@ for ((number=1;number < $(( ( $RANDOM % 20 )  + 1 ));number++))
     fi
     }
 echo -e "\e[4mtest$counter\e[0m: $ARG"
-    TEST="$($PATH_TO_PROGRAM <<< $ARG)"
+    TEST="$($PATH_TO_PROGRAM <<< $ARG' p q')"
     CORRECT="$(dc <<< $ARG' pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -184,7 +184,7 @@ do
     NUM2=$(bignum_medium)
     
     echo -e "\e[4mtest$counter\e[0m: $NUM1 * $NUM2 ="
-    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' *')"
+    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' * p q')"
     CORRECT="$(dc <<< $NUM1' '$NUM2' *pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -211,7 +211,7 @@ do
     NUM2=$(bignum)
     
     echo -e "\e[4mtest$counter\e[0m: $NUM1 / $NUM2 ="
-    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' /')"
+    TEST="$($PATH_TO_PROGRAM <<< $NUM1' '$NUM2' / p q')"
     CORRECT="$(dc <<< $NUM1' '$NUM2' /pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -243,7 +243,7 @@ for ((number=1;number < $(( ( $RANDOM % 15 )  + 1 ));number++))
     fi
     }
 echo -e "\e[4mtest$counter\e[0m: $ARG"
-    TEST="$($PATH_TO_PROGRAM <<< $ARG)"
+    TEST="$($PATH_TO_PROGRAM <<< $ARG'p q')"
     CORRECT="$(dc <<< $ARG' pq')"
 
     if [ "$CORRECT" != "$TEST" ];
@@ -275,7 +275,7 @@ for ((number=1;number < $(( ( $RANDOM % 20 )  + 1 ));number++))
     fi
     }
 echo -e "\e[4mtest$counter\e[0m: $ARG"
-    TEST="$($PATH_TO_PROGRAM <<< $ARG)"
+    TEST="$($PATH_TO_PROGRAM <<< $ARG' p q')"
     CORRECT="$(dc <<< $ARG' pq')"
 
     if [ "$CORRECT" != "$TEST" ];
