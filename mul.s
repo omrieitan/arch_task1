@@ -46,7 +46,6 @@ _multiply:
             je handle_end_of_num1               ; call fucntion to handle the case were we need to add a add/mull carry
             jmp num1_loop_end
             
-    
         num1_loop_end:                          ; decreasing counters
             dec links_count1                    
             cmp links_count1,0
@@ -93,6 +92,7 @@ _multiply:
         mov result_ptr, qword [result_ptr+8]
         mov qword [result_ptr+16], carry
         mov result_ptr, qword[result_ptr]
+        mov carry, 0
         jmp num1_loop_end
         
     add_at_the_end_of_num2:
