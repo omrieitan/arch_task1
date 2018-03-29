@@ -105,7 +105,6 @@ int main() {
         else if(c == '+'){
             bignum* num2 = pop();
             bignum* num1 = pop();
-            equalize_links(num1,num2);
             if(!num2->sign && num1->sign) {
                 num1->sign = 0;
                 subtract(num2, num1);

@@ -82,7 +82,7 @@ _multiply:
         
     
     carry_handle:
-        idiv rcx                                ; opraate divition: digit1=digit1/10 and rdx=remeinder
+        idiv rcx                                ; operate divition: digit1=digit1/10 and rdx=remeinder
         mov [result_ptr+16], rdx
         mov carry, digit1                       ; store carry
         jmp get_next_num1_digit
