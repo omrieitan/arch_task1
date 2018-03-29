@@ -45,7 +45,7 @@ bignum* init_mul_result(long length_num1,long length_num2);
  */
 extern void _add (bignum*, bignum*);
 extern void _subtract (bignum*, bignum*);
-extern void _multiply (bignum*, bignum*,bignum*); // todo in ASM
+extern void _multiply (bignum*, bignum*,bignum*);
 extern void _divide (bignum*, bignum*); // todo in ASM
 
 
@@ -97,7 +97,7 @@ int main() {
             push(result);
 //            free_bigNum(num1);
 //            free_bigNum(num2);
-            continue;// todo multiply
+            continue;
         }
         else if(c == '/'){
             continue;// todo divide
@@ -129,7 +129,10 @@ int main() {
             continue;
         }
         else if(c == 'p'){
-            print_bignum(s.arr[s.top]);
+            if(s.top == -1)
+                printf("stack empty");
+            else
+                print_bignum(s.arr[s.top]);
             printf("\n");
             continue;
         }
