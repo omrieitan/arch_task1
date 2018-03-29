@@ -38,7 +38,6 @@ _multiply:
         
         get_next_num1_digit:
             mov num1_ptr, qword [num1_ptr+8]	; get next link of first number
-	    mov result_ptr, qword [result_ptr+8]; get next link of result number
 	    jmp end_of_num1_check
 	    
         end_of_num1_check:                      ; reached the end of iteration over num1
@@ -47,7 +46,8 @@ _multiply:
             jmp num1_loop_end
             
         num1_loop_end:                          ; decreasing counters
-            dec links_count1                    
+            dec links_count1
+            mov result_ptr, qword [result_ptr+8]; get next link of result number
             cmp links_count1,0
             jnz num1_loop
     
@@ -71,29 +71,30 @@ _multiply:
         jmp end
         
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;functions;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;FUNCTIONS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
         
     handle_end_of_num1:
-        cmp qword [result_ptr+16], 10
-        jge add_at_the_end
+        cmp carry, 0
+        jg add_at_the_end
         jmp num1_loop_end
         
     
-    carry_handle:
-        idiv rcx                                ; operate divition: digit1=digit1/10 and rdx=remeinder
-        mov [result_ptr+16], rdx
-        mov carry, digit1                       ; store carry
-        jmp get_next_num1_digit
-    
-        
     add_at_the_end:
         mov result_ptr, qword [result_ptr+8]
         mov qword [result_ptr+16], carry
         mov result_ptr, qword[result_ptr]
         mov carry, 0
         jmp num1_loop_end
+        
+        
+    carry_handle:
+        idiv rcx                                ; operate divition: digit1=digit1/10 and rdx=remeinder
+        mov [result_ptr+16], rdx
+        mov carry, digit1                       ; store carry
+        jmp get_next_num1_digit
+    
         
     add_at_the_end_of_num2:
         mov digit1, qword[result_ptr+16]
