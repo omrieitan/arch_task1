@@ -1,13 +1,12 @@
 %define num1_ptr r13
 %define num2_ptr rbx
-%define mul_carry r9
+%define carry r9
 %define links_count1 r12
 %define links_count2 r11
 %define result_ptr r8
 %define digit1 rax
 %define digit2 r10
 %define result_curr r14
-%define add_carry r15
 
 section .text
 global _multiply
@@ -23,8 +22,8 @@ _multiply:
     mov result_curr, [rdx+24]
     mov links_count1, [rdi]           		; number of links of num1
     mov links_count2, [rsi]           		; number of links of num2
-    mov add_carry, 0
-    mov mul_carry, 0
+    mov carry, 0
+    mov rcx, 10
     
 
     num2_loop:
@@ -33,11 +32,9 @@ _multiply:
         num1_loop:
             mov digit1, [num1_ptr+16]		;get the number from the link of the first number
             mul digit2
-            add digit1,mul_carry
-            mov mul_carry, 0
-            cmp digit1,10
-            jge mul_carry_handle                ; carry -> handle the addition of the carry
-            jmp insert_new_digit                ; no carry -> add addtion carry and mul resualt, and add to resulat
+            add digit1,carry
+            add digit1, qword[result_ptr+16]
+            jmp carry_handle                     ; carry -> handle the addition of the carry
         
         get_next_num1_digit:
             mov num1_ptr, qword [num1_ptr+8]	; get next link of first number
@@ -66,8 +63,7 @@ _multiply:
         mov qword num1_ptr, [rdi+24]            ; reset num1 to first digit
         mov result_curr, [result_curr+8]        ; start add from the next digit
         mov result_ptr, result_curr             ; get new starting digit for addtion
-        mov mul_carry, 0                        ; mul carry = 0
-        mov add_carry, 0                        ; add carry = 0
+        mov carry, 0                            ; carry = 0
         mov links_count1, [rdi]                 ; reset links_count1
 
         dec links_count2                        ; decreasing counters
@@ -80,51 +76,37 @@ _multiply:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
         
-    insert_new_digit:
-        add qword [result_ptr+16], digit1
-        add qword [result_ptr+16], add_carry
-        mov add_carry, 0
-        cmp qword [result_ptr+16], 10
-        jge add_carry_handle 
-        jmp get_next_num1_digit
-        
-        
     handle_end_of_num1:
-        add qword [result_ptr+16], mul_carry
         cmp qword [result_ptr+16], 10
-        jge add_one_at_the_end
+        jge add_at_the_end
         jmp num1_loop_end
         
     
-    mul_carry_handle:
-        mov rcx, 10
-        idiv rcx
-        add [result_ptr+16], rdx
-        mov mul_carry, digit1
-        cmp qword [result_ptr+16], 10
-        jge add_carry_handle
+    carry_handle:
+        idiv rcx                                ; opraate divition: digit1=digit1/10 and rdx=remeinder
+        mov [result_ptr+16], rdx
+        mov carry, digit1                       ; store carry
         jmp get_next_num1_digit
     
-    add_carry_handle:
-        sub qword [result_ptr+16], 10
-        mov add_carry, 1
-        jmp get_next_num1_digit
         
-    add_one_at_the_end:
+    add_at_the_end:
         mov result_ptr, qword [result_ptr+8]
-        add qword [result_ptr+16], 1
+        mov qword [result_ptr+16], carry
         mov result_ptr, qword[result_ptr]
         jmp num1_loop_end
         
-    add_one_at_the_end_and_exit:
+    add_at_the_end_of_num2:
+        mov digit1, qword[result_ptr+16]
+        idiv rcx
+        mov [result_ptr+16], rdx
         mov result_ptr, qword [result_ptr+8]
-        add qword [result_ptr+16], 1
+        add qword [result_ptr+16], digit1 
         jmp end
         
     handle_end_of_num2:
-        add qword [result_ptr+16], mul_carry
+        add qword [result_ptr+16], carry
         cmp qword [result_ptr+16], 10
-        jge add_one_at_the_end_and_exit
+        jge add_at_the_end_of_num2
         jmp end
         
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
