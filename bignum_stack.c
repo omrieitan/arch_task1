@@ -90,6 +90,8 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             bignum* result= init_mul_result(num1->number_of_links,num2->number_of_links);
+            if(num1->sign != num2->sign)
+                result->sign = 1;
             equalize_links(num1,num2);
             _multiply (num1, num2,result);
             push(result);
