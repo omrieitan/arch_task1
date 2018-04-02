@@ -305,7 +305,7 @@ echo "    --add OR -a     : for tests of single add operation
     --help OR -h    : for help (and all following flags will be ignored)
     
 * made to run on linux.
-* uses the dc command for comparation.
+* uses the dc command for comparison.
 * numbers, operations and their order are generated randomly each time."
                 }
                 exit 1
