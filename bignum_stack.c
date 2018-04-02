@@ -34,6 +34,7 @@ int compare_bignum(bignum* bn1, bignum* bn2);
 void subtract(bignum* num1, bignum* num2);
 void free_bigNum(bignum * bn);
 bignum* init_mul_result(long length_num1,long length_num2);
+int is_zero(bignum* bn1);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -46,7 +47,7 @@ bignum* init_mul_result(long length_num1,long length_num2);
 extern void _add (bignum*, bignum*);
 extern void _subtract (bignum*, bignum*);
 extern void _multiply (bignum*, bignum*,bignum*);
-extern void _divide (bignum*, bignum*); // todo in ASM
+extern void _divide (bignum*, bignum*, bignum*, bignum*, bignum*); // todo in ASM
 
 
 /**
@@ -100,6 +101,29 @@ int main() {
             continue;
         }
         else if(c == '/'){
+            bignum* num2 = pop();
+            bignum* num1 = pop();
+            bignum* mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
+            bignum* power = init_mul_result(num1->number_of_links,num2->number_of_links);
+            power->last->num = 1;
+            bignum* ans= (bignum*) malloc(sizeof(bignum));
+            ans->number_of_links = 1;
+            ans->head = (link*) malloc(sizeof(link));
+            ans->last = ans->head;
+            ans->head->num = 0;
+
+            if(is_zero(num2)) {
+                printf("divide by zero\n");
+                push(ans);
+            }
+            else if(compare_bignum(num1,num2)){
+                ans->head->num = 1;
+                push(ans);
+            }
+            else {
+                equalize_links(num1, ans);
+                _divide(num1, num2, mul_ptr, power, ans);
+            }
             continue;// todo divide
         }
         else if(c == '+'){
@@ -364,4 +388,12 @@ bignum* init_mul_result(long length_num1,long length_num2){
         result->last = newLink;
     }
     return result;
+}
+
+int is_zero(bignum* bn1){
+    link* curr = bn1->head;
+    while(curr!=0)
+        if(curr->num!=0)
+            return 0;
+    return 1;
 }

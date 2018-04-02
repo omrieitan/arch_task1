@@ -8,9 +8,9 @@ ASM_FLAGS = -f elf64
 all: calc
 
 # link and build program
-calc: bin/add.o bin/sub.o bin/mul.o bin/bignum_stack.o
+calc: bin/add.o bin/sub.o bin/mul.o bin/div.o bin/bignum_stack.o
 	@echo 'Building targets'
-	$(CC) -o bin/calc bin/add.o bin/sub.o bin/mul.o bin/bignum_stack.o 
+	$(CC) -o bin/calc bin/add.o bin/sub.o bin/div.o bin/mul.o bin/bignum_stack.o 
 	@echo 'Finished building targets'
 	@echo ' '
 
@@ -23,6 +23,9 @@ bin/sub.o: sub.s
 	
 bin/mul.o: mul.s
 	$(ASM) $(ASM_FLAGS)  mul.s -o bin/mul.o
+	
+bin/div.o: mul.s
+	$(ASM) $(ASM_FLAGS)  div.s -o bin/div.o	
 	
 bin/bignum_stack.o: bignum_stack.c
 	$(CC) -c bignum_stack.c -o bin/bignum_stack.o
