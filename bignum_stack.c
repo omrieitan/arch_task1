@@ -112,19 +112,18 @@ int main() {
             ans->last = ans->head;
             ans->head->num = 0;
 
-            if(is_zero(num2)) {
+            if(is_zero(num2))
                 printf("divide by zero\n");
-                push(ans);
-            }
-            else if(compare_bignum(num1,num2)){
+            else if(compare_bignum(num1,num2) < 0)
+                ans->head->num = 0;
+            else if(compare_bignum(num1,num2) == 0)
                 ans->head->num = 1;
-                push(ans);
-            }
             else {
                 equalize_links(num1, ans);
                 _divide(num1, num2, mul_ptr, power, ans);
             }
-            continue;// todo divide
+            push(ans);
+            continue;
         }
         else if(c == '+'){
             bignum* num2 = pop();
@@ -392,8 +391,10 @@ bignum* init_mul_result(long length_num1,long length_num2){
 
 int is_zero(bignum* bn1){
     link* curr = bn1->head;
-    while(curr!=0)
-        if(curr->num!=0)
+    while(curr!=0) {
+        if (curr->num != 0)
             return 0;
+        curr = curr->next;
+    }
     return 1;
 }
