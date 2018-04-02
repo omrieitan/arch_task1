@@ -47,7 +47,7 @@ int is_zero(bignum* bn1);
 extern void _add (bignum*, bignum*);
 extern void _subtract (bignum*, bignum*);
 extern void _multiply (bignum*, bignum*,bignum*);
-extern void _divide (bignum*, bignum*, bignum*, bignum*, bignum*); // todo in ASM
+extern void _divide (bignum*, bignum*, bignum*, bignum*, bignum*);
 
 
 /**
@@ -103,6 +103,7 @@ int main() {
         else if(c == '/'){
             bignum* num2 = pop();
             bignum* num1 = pop();
+            equalize_links(num1,num2);
             bignum* mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
             bignum* power = init_mul_result(num1->number_of_links,num2->number_of_links);
             power->last->num = 1;
