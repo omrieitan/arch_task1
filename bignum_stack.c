@@ -488,11 +488,6 @@ void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * 
 
 
 int compare_for_div(bignum * bn1,bignum * bn2){
-//    printf("compare\n");
-//    print_bignum(bn1);
-//    printf("\n");
-//    print_bignum(bn2);
-//    printf("\n");
     equalize_links(bn1,bn2);
     link* curr1 = bn1->head;
     link* curr2 = bn2->head;
@@ -500,11 +495,6 @@ int compare_for_div(bignum * bn1,bignum * bn2){
         curr1 = curr1->next;
         curr2 = curr2->next;
     }
-//    printf("compare_end\n");
-//    print_bignum(bn1);
-//    printf("\n");
-//    print_bignum(bn2);
-//    printf("\n\n");
     if(curr1 == 0)
         return 0;
     return curr1->num - curr2->num;
