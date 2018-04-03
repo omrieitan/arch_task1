@@ -4,6 +4,7 @@
 %define power_ptr rcx
 %define ans_ptr r8
 %define curr_power r9
+%define power_count r15
 
 section .text
 global _divide
@@ -16,16 +17,17 @@ _divide:
     mov rbp, rsp
     
     mov curr_power, qword [power_ptr+24]
+    mov power_count, 0
     
     main_loop:
         jmp comp_nums
         
         continue_loop:
         
-        push rdi
-        push rsi
-        push rdx
-        call _multiply
+        push num2
+        push power_ptr
+        push mul_ptr
+        call _multiply ; mul_ptr = num2 * power_ptr
         add rsp, 24
         
         jmp compare
@@ -34,12 +36,14 @@ _divide:
             mov qword [curr_power+16], 0              ;shift left the power curr_power=curr_power*10
             mov curr_power, qword [curr_power+8]
             mov qword [curr_power+16], 1
+            inc power_count
             jmp main_loop
         
         mul_is_bigger:
             mov qword [curr_power+16], 0
             mov curr_power, qword [curr_power]
             mov qword [curr_power+16], 1
+            dec power_count
             
             jmp init_mul
             mul_ready:
@@ -112,7 +116,7 @@ compare:
         dec r10
         cmp r10, 0
         jnz comp_loop1
-    
+    end_comp_loop1:
     mov r10, qword [rdi]  ; num of links in num1
     mov r11, qword [rdx+16] ; head of mul_ptr
     mov r12, qword [rdi+16] ;  head of num1

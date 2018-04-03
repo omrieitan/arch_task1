@@ -15,6 +15,17 @@ _multiply:
     push rbp                                    ; Save caller state
     mov rbp, rsp
     
+    push rdx
+    push rbx
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+
+    
     mov qword num1_ptr, [rdi+24]      	        ; get num1
     mov num2_ptr, [rsi+24]        		; get num2
     mov result_ptr, [rdx+24]         		; get result
@@ -24,7 +35,7 @@ _multiply:
     mov carry, 0
     mov rcx, 10
     
-    push rdx
+    
     
     num2_loop:
         mov digit2, [num2_ptr+16]		;get the number from the link of the secound number
@@ -117,8 +128,19 @@ _multiply:
                 
     
     end:
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rbx
     pop rdx
+    
     mov [rbp-8], digit1
+    
+    
 
     pop rbp                                     ; Restore caller state
     ret
