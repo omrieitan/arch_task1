@@ -21,27 +21,32 @@ _divide:
         jmp comp_nums
         
         continue_loop:
-        ;print_mul:
-        ;mov r10, qword [rdx+16]
-        ;mov r11, qword [r10]
-        ;mov r12, qword [r11]
-        ;mov r13, qword [r12]
-        ;mov r14, qword [r13]
-        ;mov r15, qword [r14]
-        ;end_print_mul:
+        
         
         push rdi
         push rsi
         
-        mov rdi, num2
-        mov rsi, power_ptr
-        mov rdx, mul_ptr
+        ;mov rdi, num2
+        ;mov rsi, power_ptr
+        ;mov rdx, mul_ptr
+        push num2
+        push power_ptr
+        push mul_ptr
         before_mul:
         call _multiply ; mul_ptr = num2 * power_ptr
         add rsp, 24
         
         pop rsi
         pop rdi
+        
+        print_mul:
+        mov r10, qword [rdx+24]
+        mov r11, qword [r10+8]
+        mov r12, qword [r11+8]
+        mov r13, qword [r12+8]
+        mov r14, qword [r13+8]
+        mov r15, qword [r14+8]
+        end_print_mul:
         
         jmp compare
         

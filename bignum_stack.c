@@ -419,12 +419,15 @@ void add_zero(bignum* bn1,bignum* bn2){
     newLink->next = bn1->head;
     bn1->head->prev = newLink;
     bn1->head = newLink;
+    bn1->number_of_links++;
 
     link* newLink2 = (link*) malloc(sizeof(link));
     newLink2->num = 0;
     newLink2->next = bn2->head;
     bn2->head->prev = newLink2;
     bn2->head = newLink2;
+    bn2->number_of_links++;
+
 }
 
 
@@ -460,30 +463,32 @@ void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * 
     while(compare_for_div(num1,num2)>=0) {
 
         while (compare_for_div(num1, mul_ptr) >= 0) {
-            printf("loop in");
-            free_bigNum(mul_ptr);
+            printf("loop in\n");
+            //free_bigNum(mul_ptr);
             mul_ptr=init_mul_result(num1->number_of_links,num2->number_of_links);
+            _multiply(num2, power, mul_ptr);
+            print_bignum(mul_ptr);
+            printf("\n");
+            delete_zeros(mul_ptr);
             power_curr->num = 0;
             power_curr = power_curr->prev;
             power_curr->num = 1;
-            _multiply(num2, power, mul_ptr);
-            delete_zeros(mul_ptr);
+            printf("after\n");
         }
+        power_curr->num = 0;
+        power_curr = power_curr->next;
+        power_curr->num = 1;
         printf("loop out");
-       power_curr->num = 0;
-       power_curr = power_curr->next;
-       power_curr->num = 1;
        _multiply(num2, power, mul_ptr);
         delete_zeros(mul_ptr);
         equalize_links(mul_ptr,num1);
        _subtract(num1,mul_ptr);
        _add(ans, mul_ptr);
     }
-    printf("div_c_out");
+    printf("div_c_out\n");
     print_bignum(mul_ptr);
 
 }
-
 
 
 int compare_for_div(bignum * bn1,bignum * bn2){
