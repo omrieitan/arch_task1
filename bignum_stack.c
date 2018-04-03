@@ -36,6 +36,7 @@ void free_bigNum(bignum * bn);
 bignum* init_mul_result(long length_num1,long length_num2);
 int is_zero(bignum* bn1);
 void add_zero(bignum* bn1,bignum* bn2);
+void delete_zeros(bignum * bn);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -107,7 +108,6 @@ int main() {
             equalize_links(num1,num2);
             add_zero(num1,num2);
             bignum* mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
-
             bignum* power= (bignum*) malloc(sizeof(bignum));
             power->number_of_links = 1;
             power->head = (link*) malloc(sizeof(link));
@@ -420,4 +420,13 @@ void add_zero(bignum* bn1,bignum* bn2){
     newLink2->next = bn2->head;
     bn2->head->prev = newLink2;
     bn2->head = newLink2;
+}
+
+void delete_zeros(bignum * bn){
+    link * curr = bn->head;
+    while(curr->num==0 & bn->number_of_links!=1){
+        curr=curr->next;
+        free(curr->prev);
+        bn->number_of_links--;
+    }
 }
