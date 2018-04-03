@@ -35,6 +35,7 @@ void subtract(bignum* num1, bignum* num2);
 void free_bigNum(bignum * bn);
 bignum* init_mul_result(long length_num1,long length_num2);
 int is_zero(bignum* bn1);
+void add_zero(bignum* bn1,bignum* bn2);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -104,9 +105,15 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
+            add_zero(num1,num2);
             bignum* mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
-            bignum* power = init_mul_result(num1->number_of_links,num2->number_of_links);
+
+            bignum* power= (bignum*) malloc(sizeof(bignum));
+            power->number_of_links = 1;
+            power->head = (link*) malloc(sizeof(link));
+            power->last = power->head;
             power->last->num = 1;
+
             bignum* ans= (bignum*) malloc(sizeof(bignum));
             ans->number_of_links = 1;
             ans->head = (link*) malloc(sizeof(link));
@@ -120,7 +127,7 @@ int main() {
             else if(compare_bignum(num1,num2) == 0)
                 ans->head->num = 1;
             else {
-                equalize_links(num1, ans);
+                equalize_links(power, num1);
                 _divide(num1, num2, mul_ptr, power, ans);
             }
             push(ans);
@@ -398,4 +405,19 @@ int is_zero(bignum* bn1){
         curr = curr->next;
     }
     return 1;
+}
+
+void add_zero(bignum* bn1,bignum* bn2){
+
+    link* newLink = (link*) malloc(sizeof(link));
+    newLink->num = 0;
+    newLink->next = bn1->head;
+    bn1->head->prev = newLink;
+    bn1->head = newLink;
+
+    link* newLink2 = (link*) malloc(sizeof(link));
+    newLink2->num = 0;
+    newLink2->next = bn2->head;
+    bn2->head->prev = newLink2;
+    bn2->head = newLink2;
 }

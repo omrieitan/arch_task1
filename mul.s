@@ -16,6 +16,7 @@ _multiply:
     mov rbp, rsp
     
     push rdx
+    push rcx
     push rbx
     push r8
     push r9
@@ -25,7 +26,6 @@ _multiply:
     push r13
     push r14
 
-    
     mov qword num1_ptr, [rdi+24]      	        ; get num1
     mov num2_ptr, [rsi+24]        		; get num2
     mov result_ptr, [rdx+24]         		; get result
@@ -34,7 +34,7 @@ _multiply:
     mov links_count2, [rsi]           		; number of links of num2
     mov carry, 0
     mov rcx, 10
-    
+    xor rax, rax
     
     
     num2_loop:
@@ -136,6 +136,7 @@ _multiply:
     pop r9
     pop r8
     pop rbx
+    pop rcx
     pop rdx
     
     mov [rbp-8], digit1

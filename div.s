@@ -4,7 +4,6 @@
 %define power_ptr rcx
 %define ans_ptr r8
 %define curr_power r9
-%define power_count r15
 
 section .text
 global _divide
@@ -15,20 +14,34 @@ extern _add
 _divide:
     push rbp                                    ; Save caller state
     mov rbp, rsp
-    
+        
     mov curr_power, qword [power_ptr+24]
-    mov power_count, 0
     
     main_loop:
         jmp comp_nums
         
         continue_loop:
+        ;print_mul:
+        ;mov r10, qword [rdx+16]
+        ;mov r11, qword [r10]
+        ;mov r12, qword [r11]
+        ;mov r13, qword [r12]
+        ;mov r14, qword [r13]
+        ;mov r15, qword [r14]
+        ;end_print_mul:
         
-        push num2
-        push power_ptr
-        push mul_ptr
+        push rdi
+        push rsi
+        
+        mov rdi, num2
+        mov rsi, power_ptr
+        mov rdx, mul_ptr
+        before_mul:
         call _multiply ; mul_ptr = num2 * power_ptr
         add rsp, 24
+        
+        pop rsi
+        pop rdi
         
         jmp compare
         
@@ -36,42 +49,31 @@ _divide:
             mov qword [curr_power+16], 0              ;shift left the power curr_power=curr_power*10
             mov curr_power, qword [curr_power+8]
             mov qword [curr_power+16], 1
-            inc power_count
-            jmp main_loop
+            jmp continue_loop
         
         mul_is_bigger:
             mov qword [curr_power+16], 0
             mov curr_power, qword [curr_power]
             mov qword [curr_power+16], 1
-            dec power_count
             
             jmp init_mul
             mul_ready:
-            push num1
-            push num2
-            mov rdi, num2  ;move paramters into calling positions for function
-            mov rsi, power_ptr
-            mov rdx, mul_ptr
-            call _multiply  ; mul_ptr = num2 * power_ptr
-            pop num2
-            pop num1
             
-            push num1
             push num2
-            mov rdi, num1               ;move paramters into calling positions for function
-            mov rsi, mul_ptr
+            push power_ptr
+            push mul_ptr
+            call _multiply                  ; mul_ptr = num2 * power_ptr
+            add rsp, 24
+
+            push num1
+            push mul_ptr
             call _subtract                  ; num1 = num1 - mul_ptr
-            pop num2
-            pop num1
-            
-            push num1
-            push num2
-            mov rdi, ans_ptr                ;move paramters into calling positions for function
-            mov rsi, mul_ptr
+            add rsp, 16
+
+            push ans_ptr
+            push mul_ptr
             call _add                       ; ans_ptr = ans_ptr + mul_ptr
-            pop num2
-            pop num1
-            
+            add rsp, 16
             
             jmp init_mul2
             mul_ready2:
@@ -106,20 +108,19 @@ comp_nums:
     jmp continue_loop
 
 compare:
-    mov r10, qword [rdi] ; num of links in num1
+    mov r10, qword [num1] ; num of links in num1
     mov r11, qword [rdx+16] ; head of mul_ptr
     comp_loop1:
         mov r12, qword [r11+16]
         cmp r12, 0
-        jne mul_is_bigger
+        jnz mul_is_bigger
         mov r11, qword [r11]
         dec r10
         cmp r10, 0
         jnz comp_loop1
     end_comp_loop1:
-    mov r10, qword [rdi]  ; num of links in num1
-    mov r11, qword [rdx+16] ; head of mul_ptr
-    mov r12, qword [rdi+16] ;  head of num1
+    mov r10, qword [num1]  ; num of links in num1
+    mov r12, qword [num1+16] ;  head of num1
     comp_loop2:
         mov r13, qword [r11+16]
         mov r14, qword [r12+16]
@@ -165,6 +166,5 @@ init_mul2:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
     end_div:
-
     pop rbp                                     ; Restore caller state
     ret

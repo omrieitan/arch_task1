@@ -5,6 +5,17 @@ extern sub_borrow
 _subtract:
     push rbp                    ; Save caller state
     mov rbp, rsp
+    
+    push rdx
+    push rcx
+    push rbx
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
 
     mov rax, [rdi+24]        ; Copy function args to registers: leftmost...
     mov rbx, [rsi+24]        ; Next argument...
@@ -40,6 +51,17 @@ _subtract:
         call sub_borrow
 
     end_sub:
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rbx
+    pop rcx
+    pop rdx
+    
     mov [rbp-8], rax
 
     pop rbp                     ; Restore caller state
