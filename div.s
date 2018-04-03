@@ -1,5 +1,5 @@
-%define num1_ptr rdi
-%define num2_ptr rsi
+%define num1 rdi
+%define num2 rsi
 %define mul_ptr rdx
 %define power_ptr rcx
 %define ans_ptr r8
@@ -21,15 +21,13 @@ _divide:
         jmp comp_nums
         
         continue_loop:
-        mov r10, num1_ptr
-        mov r11, num2_ptr
         
-        mov rdi, num2_ptr                 
-        mov rsi, power_ptr
-        mov rdx, mul_ptr
+        push rdi
+        push rsi
+        push rdx
         call _multiply
-        ;pop num2_ptr
-        ;pop num1_ptr
+        add rsp, 24
+        
         jmp compare
         
         num1_is_bigger:
@@ -45,30 +43,30 @@ _divide:
             
             jmp init_mul
             mul_ready:
-            push num1_ptr
-            push num2_ptr
-            mov rdi, num2_ptr  ;move paramters into calling positions for function
+            push num1
+            push num2
+            mov rdi, num2  ;move paramters into calling positions for function
             mov rsi, power_ptr
             mov rdx, mul_ptr
-            call _multiply  ; mul_ptr = num2_ptr * power_ptr
-            pop num2_ptr
-            pop num1_ptr
+            call _multiply  ; mul_ptr = num2 * power_ptr
+            pop num2
+            pop num1
             
-            push num1_ptr
-            push num2_ptr
-            mov rdi, num1_ptr               ;move paramters into calling positions for function
+            push num1
+            push num2
+            mov rdi, num1               ;move paramters into calling positions for function
             mov rsi, mul_ptr
-            call _subtract                  ; num1_ptr = num1_ptr - mul_ptr
-            pop num2_ptr
-            pop num1_ptr
+            call _subtract                  ; num1 = num1 - mul_ptr
+            pop num2
+            pop num1
             
-            push num1_ptr
-            push num2_ptr
+            push num1
+            push num2
             mov rdi, ans_ptr                ;move paramters into calling positions for function
             mov rsi, mul_ptr
             call _add                       ; ans_ptr = ans_ptr + mul_ptr
-            pop num2_ptr
-            pop num1_ptr
+            pop num2
+            pop num1
             
             
             jmp init_mul2
@@ -86,15 +84,15 @@ _divide:
 
 
 comp_nums:
-    mov r10, qword [num1_ptr]  ; num of links in num1
-    mov r11, qword [num1_ptr+16] ; head of num1
-    mov r12, qword [num2_ptr+16] ;  head of num2
+    mov r10, qword [num1]  ; num of links in num1
+    mov r11, qword [num1+16] ; head of num1
+    mov r12, qword [num2+16] ;  head of num2
     nums_loop:
         mov r13, qword [r11+16]
         mov r14, qword [r12+16]
         cmp r13, r14
         jg continue_loop
-        jl end
+        jl end_div
         
         mov r11, qword [r11]
         mov r12, qword [r12]
@@ -161,10 +159,8 @@ init_mul2:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;END;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-                
     
-    end:
+    end_div:
 
     pop rbp                                     ; Restore caller state
     ret

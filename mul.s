@@ -24,7 +24,8 @@ _multiply:
     mov carry, 0
     mov rcx, 10
     
-
+    push rdx
+    
     num2_loop:
         mov digit2, [num2_ptr+16]		;get the number from the link of the secound number
     
@@ -116,6 +117,7 @@ _multiply:
                 
     
     end:
+    pop rdx
     mov [rbp-8], digit1
 
     pop rbp                                     ; Restore caller state
