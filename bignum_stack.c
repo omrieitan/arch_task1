@@ -101,8 +101,8 @@ int main() {
                 result->sign = 1;
             _multiply (num1, num2,result);
             push(result);
-//            free_bigNum(num1);
-//            free_bigNum(num2);
+            free_bigNum(num1);
+            free_bigNum(num2);
             continue;
         }
         else if(c == '/'){
@@ -152,7 +152,7 @@ int main() {
             else {
                 _add(num1, num2);
                 push(num1);
-  //              free_bigNum(num2);
+                free_bigNum(num2);
             }
             continue;
         }
@@ -260,7 +260,7 @@ int isEmpty(){
 }
 
 void print_bignum(bignum *bn){
-    int zeros = 1;
+    int zeros = 0;
     link* curr = bn->head;
     if(bn->sign)
         printf("-");
@@ -352,36 +352,36 @@ void subtract(bignum* num1, bignum* num2){
     if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
         _subtract(num1, num2);
         push(num1);
-//        free_bigNum(num2);
+        free_bigNum(num2);
     }
     else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
         _subtract(num2, num1);
         num2->sign = 1 - num2->sign; // if =1 change to 0 , if =0 change to 1
         push(num2);
- //       free_bigNum(num1);
+       free_bigNum(num1);
     }
     else if(num1->sign ^ num2->sign){ // 3 4 5 8
         _add(num1, num2);
         push(num1);
-//        free_bigNum(num2);
+        free_bigNum(num2);
     }
     else if(comp == 0){
         _subtract(num1, num2);
         num1->sign = 0;
         push(num1);
-//        free_bigNum(num2);
+        free_bigNum(num2);
     }
 }
 
 void free_bigNum(bignum * bn){
-    link *curr = bn->last;
-    link *temp = bn->last;
-    while(curr!=0){
+    link *curr = bn->head;
+    link *temp = curr;
+    while (curr->next!=0){
         temp=curr;
-        curr=curr->prev;
+        curr=curr->next;
         free(temp);
     }
- //   free(bn);
+    free(bn);
 }
 
 bignum* init_mul_result(long length_num1,long length_num2){
@@ -462,7 +462,7 @@ void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * 
     while(compare_for_div(num1,num2) >= 0) {
         do {
             delete_zeros(num1);
-            //free_bigNum(mul_ptr);
+            free_bigNum(mul_ptr);
             mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
             _multiply(num2, power, mul_ptr);
                 power_curr->num = 0;
@@ -473,6 +473,7 @@ void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * 
         power_curr->num = 0;
         power_curr = power_curr->next->next;
         power_curr->num = 1;
+        free_bigNum(mul_ptr);
         mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
         _multiply(num2, power, mul_ptr);
         delete_zeros(mul_ptr);
