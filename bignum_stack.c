@@ -103,8 +103,9 @@ int main() {
                 result->sign = 1;
             _multiply (num1, num2,result);
             push(result);
-            //free_bigNum(num1);
-            //free_bigNum(num2);
+            free_bigNum(num1);
+            free_bigNum(num2);
+            free_bigNum(bn);
             continue;
         }
         else if(c == '/'){
@@ -145,8 +146,9 @@ int main() {
             else {
                 _add(num1, num2);
                 push(num1);
-                //free_bigNum(num2);
+                free_bigNum(num2);
             }
+            free_bigNum(bn);
             continue;
         }
         else if(c == '-'){
@@ -162,15 +164,18 @@ int main() {
             else
                 print_bignum(s.arr[s.top]);
             printf("\n");
+            free_bigNum(bn);
             continue;
         }
         else if(c == 'c'){
             clear_stack();
+            free_bigNum(bn);
             continue;
         }
-        else if(c == 'q')
+        else if(c == 'q') {
+            free_bigNum(bn);
             break;
-
+        }
         else if(c == '_') {
             bn->sign = 1;
             c = (char) getchar();
@@ -193,8 +198,9 @@ int main() {
             bn->last = newLink;
             bn->number_of_links ++;
         }
-        if(c == 'q')
+        if(c == 'q') {
             break;
+        }
     }
     return 0;
 }
