@@ -40,6 +40,7 @@ void delete_zeros(bignum * bn);
 void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * ans);
 bignum* init_mul_ptr(long length);
 int compare_for_div(bignum * bn1,bignum * bn2);
+void copy_bignum(bignum* bn,bignum* bn_copy);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -52,7 +53,7 @@ int compare_for_div(bignum * bn1,bignum * bn2);
 extern void _add (bignum*, bignum*);
 extern void _subtract (bignum*, bignum*);
 extern void _multiply (bignum*, bignum*,bignum*);
-extern void _divide (bignum*, bignum*, bignum*, bignum*, bignum*);
+extern void _divide (bignum*, bignum*, bignum*, bignum*);
 
 
 /**
@@ -110,12 +111,8 @@ int main() {
             bignum* num1 = pop();
             equalize_links(num1,num2);
             add_zero(num1,num2);
-            bignum* mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
-            bignum* power= (bignum*) malloc(sizeof(bignum));
-            power->number_of_links = 1;
-            power->head = (link*) malloc(sizeof(link));
-            power->last = power->head;
-            power->last->num = 1;
+            bignum* num2_copy;
+            copy_bignum(num2,num2_copy);
 
             bignum* ans= (bignum*) malloc(sizeof(bignum));
             ans->number_of_links = 1;
@@ -130,9 +127,12 @@ int main() {
             else if(compare_bignum(num1,num2) == 0)
                 ans->head->num = 1;
             else {
-                equalize_links(power, num1);
-                //_divide(num1, num2, mul_ptr, power, ans);
-                _div_c(num1,num2, mul_ptr, power , ans);
+                printf("num2_copy: ");
+                print_bignum(num2_copy);
+                printf("\n");
+                equalize_links(ans, num1);
+                _divide(num1, num2, ans, num2_copy);
+                //_div_c(num1,num2, mul_ptr, power , ans);
             }
             push(ans);
             continue;
@@ -498,4 +498,24 @@ int compare_for_div(bignum * bn1,bignum * bn2){
     if(curr1 == 0)
         return 0;
     return curr1->num - curr2->num;
+}
+
+void copy_bignum(bignum* bn,bignum* bn_copy) {
+    bn_copy = (bignum *) malloc(sizeof(bignum));
+    bn_copy->number_of_links = 1;
+    bn_copy->head = (link *) malloc(sizeof(link));
+    bn_copy->last = bn_copy->head;
+    bn_copy->head->num = bn->head->num;
+
+    link *curr = bn->head->next;
+    while (curr != 0) {
+        link *newLink = (link *) malloc(sizeof(link));
+        newLink->num = curr->num;
+        newLink->prev = bn_copy->last;
+        bn_copy->last->next = newLink;
+        bn_copy->last = newLink;
+        bn_copy->number_of_links++;
+
+        curr = curr->next;
+    }
 }

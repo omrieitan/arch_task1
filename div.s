@@ -1,5 +1,5 @@
 section .text
-global _add
+global _divide
 extern add_carry
 extern compare_for_div
 
