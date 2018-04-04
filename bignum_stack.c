@@ -466,11 +466,9 @@ void div_helper(bignum *num1,bignum *num2,bignum * F){
     }
     else{
         bignum * b1 = copy_bignum(num2);
-        bignum * b2 = copy_bignum(num2);
-        _add(b1,b2);
+        _add(b1,num2);
         bignum * f1 = copy_bignum(F);
-        bignum * f2 = copy_bignum(F);
-        _add(f1,f2);
+        _add(f1,F);
         div_helper(num1,b1,f1);
         if(compare_for_div(R,num2) >= 0 ){
             _add(Q,F);
