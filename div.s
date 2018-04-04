@@ -1,175 +1,82 @@
-%define num1 rdi
-%define num2 rsi
-%define mul_ptr rdx
-%define power_ptr rcx
-%define ans_ptr r8
-%define curr_power r9
-
 section .text
-global _divide
-extern _multiply
-extern _subtract
-extern _add
+global _add
+extern add_carry
+extern compare_for_div
 
 _divide:
-    push rbp                                    ; Save caller state
+    push rbp                    	 ; Save caller state
     mov rbp, rsp
-        
-    mov curr_power, qword [power_ptr+24]
     
-    main_loop:
-        jmp comp_nums
-        
-        continue_loop:
-        
-        
-        push rdi
-        push rsi
-        
-        ;mov rdi, num2
-        ;mov rsi, power_ptr
-        ;mov rdx, mul_ptr
-        push num2
-        push power_ptr
-        push mul_ptr
-        before_mul:
-        call _multiply ; mul_ptr = num2 * power_ptr
-        add rsp, 24
-        
-        pop rsi
-        pop rdi
-        
-        print_mul:
-        mov r10, qword [rdx+24]
-        mov r11, qword [r10+8]
-        mov r12, qword [r11+8]
-        mov r13, qword [r12+8]
-        mov r14, qword [r13+8]
-        mov r15, qword [r14+8]
-        end_print_mul:
-        
-        jmp compare
-        
-        num1_is_bigger:
-            mov qword [curr_power+16], 0              ;shift left the power curr_power=curr_power*10
-            mov curr_power, qword [curr_power+8]
-            mov qword [curr_power+16], 1
-            jmp continue_loop
-        
-        mul_is_bigger:
-            mov qword [curr_power+16], 0
-            mov curr_power, qword [curr_power]
-            mov qword [curr_power+16], 1
-            
-            jmp init_mul
-            mul_ready:
-            
-            push num2
-            push power_ptr
-            push mul_ptr
-            call _multiply                  ; mul_ptr = num2 * power_ptr
-            add rsp, 24
-
-            push num1
-            push mul_ptr
-            call _subtract                  ; num1 = num1 - mul_ptr
-            add rsp, 16
-
-            push ans_ptr
-            push mul_ptr
-            call _add                       ; ans_ptr = ans_ptr + mul_ptr
-            add rsp, 16
-            
-            jmp init_mul2
-            mul_ready2:
-            mov qword [curr_power+16], 0
-            mov curr_power, power_ptr
-            mov qword [curr_power+16], 1 
-            jmp main_loop
-            
-            
-        
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;FUNCTIONS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-comp_nums:
-    mov r10, qword [num1]  ; num of links in num1
-    mov r11, qword [num1+16] ; head of num1
-    mov r12, qword [num2+16] ;  head of num2
-    nums_loop:
-        mov r13, qword [r11+16]
-        mov r14, qword [r12+16]
-        cmp r13, r14
-        jg continue_loop
-        jl end_div
-        
-        mov r11, qword [r11]
-        mov r12, qword [r12]
-        dec r10
-        cmp r10, 0
-        jnz nums_loop
-    jmp continue_loop
-
-compare:
-    mov r10, qword [num1] ; num of links in num1
-    mov r11, qword [rdx+16] ; head of mul_ptr
-    comp_loop1:
-        mov r12, qword [r11+16]
-        cmp r12, 0
-        jnz mul_is_bigger
-        mov r11, qword [r11]
-        dec r10
-        cmp r10, 0
-        jnz comp_loop1
-    end_comp_loop1:
-    mov r10, qword [num1]  ; num of links in num1
-    mov r12, qword [num1+16] ;  head of num1
-    comp_loop2:
-        mov r13, qword [r11+16]
-        mov r14, qword [r12+16]
-        cmp r13, r14
-        jg mul_is_bigger
-        jl num1_is_bigger
-        
-        mov r11, qword [r11]
-        mov r12, qword [r12]
-        dec r10
-        cmp r10, 0
-        jnz comp_loop2
-    jmp num1_is_bigger
-        
-
-init_mul:
-    mov r10, qword [mul_ptr]  ; num of links in mul_ptr
-    mov r11, qword [mul_ptr+16] ; head of mul_ptr
+    mov r10, [rdi+24]       		 ; num1
+    mov rbx, [rsi+24]       		 ; num2
+    mov r11, [rdx+24]                    ; ans
+    mov r15, [rcx+24]                    ; num2 copy
+    mov r9, 0
+    xor rax, rax
     
-    mul_loop:
-        mov qword [r11+16], 0
-        mov r11, [r11+8]
-        dec r10
-        cmp r10, 0
-        jnz mul_loop
-    jmp mul_ready
+    main_loop_div:
     
+    call compare_for_div
+    cmp rax, 0
+    jl end_div
+    jmp inc_count
     
-init_mul2:
-    mov r10, qword [mul_ptr]  ; num of links in mul_ptr
-    mov r11, qword [mul_ptr+16] ; head of mul_ptr
-    
-    mul_loop2:
-        mov qword [r11+16], 0
-        mov r11, [r11+8]
-        dec r10
-        cmp r10, 0
-        jnz mul_loop2
-    jmp mul_ready2
+    loop1:
+        mov r12, [rbx+16]       	; get num of the last link
+        mov r8, [r15+16]
+        add r8, r9
+        add qword r12, r8
+        cmp qword r12, 10
+        jge have_carry
+        jmp no_carry
         
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;END;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        have_carry:
+            sub r12, 10
+            mov r9, 1
+            jmp next
+        no_carry:
+            mov r9, 0
+        
+        next:
+        mov qword [r15+16], r12
+        mov r15, qword [r15+8] 		;move to next link
+        mov rbx, qword [rbx+8] 		;move to next link
+        loop loop1
+        
+        cmp r9, 1
+        je last_carry
+        jmp end_add
+        last_carry:
+        call add_carry
+        
+    end_add:
+    jmp main_loop_div
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+    inc_count:
+        mov r14, [r11+16]
+        add r14, 1
+        cmp qword r14, 10
+        jge count_carry
+        jmp end_inc
+        
+        count_carry:
+        sub r14, 10
+        mov r9, 1
+        mov r11, qword [r11+8]
+        jmp inc_count
+        
+        end_inc:
+        xor r9,r9
+        mov r11, [rdx+24]
+        jmp loop1
+        
     
     end_div:
-    pop rbp                                     ; Restore caller state
+    
+    mov [rbp-8], rax
+    pop rbp                     	; Restore caller state
     ret
