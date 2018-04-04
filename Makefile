@@ -24,7 +24,7 @@ bin/sub.o: sub.s
 bin/mul.o: mul.s
 	$(ASM) $(ASM_FLAGS)  mul.s -o bin/mul.o
 	
-bin/div.o: mul.s
+bin/div.o: div.s
 	$(ASM) $(ASM_FLAGS)  div.s -o bin/div.o	
 	
 bin/bignum_stack.o: bignum_stack.c
