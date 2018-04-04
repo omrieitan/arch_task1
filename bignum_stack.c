@@ -374,11 +374,10 @@ void subtract(bignum* num1, bignum* num2){
 }
 
 void free_bigNum(bignum * bn){
-    link *curr = bn->head;
-    link *temp = curr;
-    while (curr->next!=0){
-        temp=curr;
-        curr=curr->next;
+    link *temp = bn->head;
+    for(int i=0; i<bn->number_of_links;i++){
+        temp=bn->head;
+        bn->head=bn->head->next;
         free(temp);
     }
     free(bn);
