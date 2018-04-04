@@ -112,8 +112,10 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
-            bignum* Q = init_mul_ptr(num1->number_of_links/2);
-            bignum* R = init_mul_ptr(num1->number_of_links/2);
+            static bignum* Q = 0;
+            Q= init_mul_ptr(num1->number_of_links/2);
+            static bignum* R = 0;
+            R = init_mul_ptr(num1->number_of_links/2);
             bignum* F = init_mul_ptr(num1->number_of_links/2);
             F->last->num = 1;
 
@@ -454,11 +456,12 @@ bignum* init_mul_ptr(long length){
     return result;
 }
 
-
 void div_helper(bignum *num1,bignum *num2,bignum * F,bignum *Q,bignum *R){
     if(compare_for_div(num1,num2) < 0){
         Q = init_mul_ptr(num1->number_of_links/2);
         R = copy_bignum(num1);
+        print_bignum(R);
+        printf("RRR\n");
     }
     else{
         bignum * b = copy_bignum(num2);
@@ -468,11 +471,11 @@ void div_helper(bignum *num1,bignum *num2,bignum * F,bignum *Q,bignum *R){
         _add(F,f);
         //free_bigNum(f);
         div_helper(num1,num2,F,Q,R);
+        print_bignum(Q);
+        printf("Q\n");
+        print_bignum(R);
+        printf("R\n");
         if(compare_for_div(R,num2) >= 0 ){
-            print_bignum(Q);
-            printf("num1\n");
-            print_bignum(R);
-            printf("num2\n");
             _add(Q,F);
             _subtract(R,num2);
         }
