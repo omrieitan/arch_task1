@@ -41,7 +41,7 @@ void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * 
 bignum* init_mul_ptr(long length);
 int compare_for_div(bignum * bn1,bignum * bn2);
 bignum* copy_bignum(bignum* bn);
-void div_helper(bignum *num1,bignum *num2,bignum * F,bignum *Q,bignum *R);
+void div_helper(bignum *num1,bignum *num2,bignum * F);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -80,7 +80,8 @@ struct stack {
 typedef struct stack STACK;
 STACK s; // the instance of stack we'll be using
 
-
+bignum* R;
+bignum* Q;
 
 int main() {
     s.top = -1; // init stack
@@ -102,6 +103,7 @@ int main() {
             if(num1->sign != num2->sign)
                 result->sign = 1;
             _multiply (num1, num2,result);
+            delete_zeros(result);
             push(result);
             free_bigNum(num1);
             free_bigNum(num2);
@@ -112,13 +114,10 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
-            static bignum* Q = 0;
-            Q= init_mul_ptr(num1->number_of_links/2);
-            static bignum* R = 0;
+            Q = init_mul_ptr(num1->number_of_links/2);
             R = init_mul_ptr(num1->number_of_links/2);
             bignum* F = init_mul_ptr(num1->number_of_links/2);
             F->last->num = 1;
-
             if(is_zero(num2)) {
                 printf("divide by zero\n");
                 push(num2);
@@ -128,8 +127,14 @@ int main() {
             else if(compare_for_div(num1,num2) == 0)
                 push(F);
             else {
-                div_helper(num1, num2,F, Q, R);
-                push(Q);
+                div_helper(num1, num2,F);
+                bignum * ans = copy_bignum(Q);
+                if(num1->sign ^ num2->sign)
+                    ans->sign=1;
+                free_bigNum(num1);
+                free_bigNum(num2);
+                free_bigNum(Q);
+                push(ans);
             }
             continue;
         }
@@ -353,24 +358,24 @@ void subtract(bignum* num1, bignum* num2){
     if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
         _subtract(num1, num2);
         push(num1);
-        //free_bigNum(num2);
+        free_bigNum(num2);
     }
     else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
         _subtract(num2, num1);
         num2->sign = 1 - num2->sign; // if =1 change to 0 , if =0 change to 1
         push(num2);
-        //free_bigNum(num1);
+        free_bigNum(num1);
     }
     else if(num1->sign ^ num2->sign){ // 3 4 5 8
         _add(num1, num2);
         push(num1);
-        //free_bigNum(num2);
+        free_bigNum(num2);
     }
     else if(comp == 0){
         _subtract(num1, num2);
         num1->sign = 0;
         push(num1);
-        //free_bigNum(num2);
+        free_bigNum(num2);
     }
 }
 
@@ -381,7 +386,6 @@ void free_bigNum(bignum * bn){
         bn->head=bn->head->next;
         free(temp);
     }
-    free(bn);
 }
 
 bignum* init_mul_result(long length_num1,long length_num2){
@@ -413,7 +417,6 @@ int is_zero(bignum* bn1){
 }
 
 void add_zero(bignum* bn1,bignum* bn2){
-
     link* newLink = (link*) malloc(sizeof(link));
     newLink->num = 0;
     newLink->next = bn1->head;
@@ -456,59 +459,23 @@ bignum* init_mul_ptr(long length){
     return result;
 }
 
-void div_helper(bignum *num1,bignum *num2,bignum * F,bignum *Q,bignum *R){
+void div_helper(bignum *num1,bignum *num2,bignum * F){
     if(compare_for_div(num1,num2) < 0){
         Q = init_mul_ptr(num1->number_of_links/2);
-        R = copy_bignum(num1);
-        print_bignum(R);
-        printf("RRR\n");
+        R = num1;
     }
     else{
-        bignum * b = copy_bignum(num2);
-        _add(num2,b);
-        //free_bigNum(b);
-        bignum * f = copy_bignum(F);
-        _add(F,f);
-        //free_bigNum(f);
-        div_helper(num1,num2,F,Q,R);
-        print_bignum(Q);
-        printf("Q\n");
-        print_bignum(R);
-        printf("R\n");
+        bignum * b1 = copy_bignum(num2);
+        bignum * b2 = copy_bignum(num2);
+        _add(b1,b2);
+        bignum * f1 = copy_bignum(F);
+        bignum * f2 = copy_bignum(F);
+        _add(f1,f2);
+        div_helper(num1,b1,f1);
         if(compare_for_div(R,num2) >= 0 ){
             _add(Q,F);
             _subtract(R,num2);
         }
-    }
-}
-
-void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * ans){
-    link * power_curr = power->last;
-    while(compare_for_div(num1,num2) >= 0) {
-        do {
-            delete_zeros(num1);
-            //free_bigNum(mul_ptr);
-            mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
-            _multiply(num2, power, mul_ptr);
-            power_curr->num = 0;
-            power_curr = power_curr->prev;
-            power_curr->num = 1;
-        }while (compare_for_div(num1, mul_ptr) >= 0);
-
-        power_curr->num = 0;
-        power_curr = power_curr->next->next;
-        power_curr->num = 1;
-        //free_bigNum(mul_ptr);
-        mul_ptr = init_mul_result(num1->number_of_links,num2->number_of_links);
-        _multiply(num2, power, mul_ptr);
-        delete_zeros(mul_ptr);
-        equalize_links(mul_ptr,num1);
-        _subtract(num1,mul_ptr);
-        equalize_links(ans,power);
-        _add(ans, power);
-        power_curr->num = 0;
-        power_curr = power->last;
-        power_curr->num = 1;
     }
 }
 
