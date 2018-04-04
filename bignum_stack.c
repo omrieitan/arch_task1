@@ -40,7 +40,8 @@ void delete_zeros(bignum * bn);
 void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * ans);
 bignum* init_mul_ptr(long length);
 int compare_for_div(bignum * bn1,bignum * bn2);
-void copy_bignum(bignum* bn,bignum* bn_copy);
+bignum* copy_bignum(bignum* bn);
+void div_helper(bignum *num1,bignum *num2,bignum * F,bignum *Q,bignum *R);
 
 /**
  * ****external asm function for arithmetic operations****
@@ -110,31 +111,23 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
-            add_zero(num1,num2);
-            bignum* num2_copy;
-            copy_bignum(num2,num2_copy);
+            bignum* Q = init_mul_ptr(num1->number_of_links/2);
+            bignum* R = init_mul_ptr(num1->number_of_links/2);
+            bignum* F = init_mul_ptr(num1->number_of_links/2);
+            F->last->num = 1;
 
-            bignum* ans= (bignum*) malloc(sizeof(bignum));
-            ans->number_of_links = 1;
-            ans->head = (link*) malloc(sizeof(link));
-            ans->last = ans->head;
-            ans->head->num = 0;
-
-            if(is_zero(num2))
+            if(is_zero(num2)) {
                 printf("divide by zero\n");
-            else if(compare_bignum(num1,num2) < 0)
-                ans->head->num = 0;
-            else if(compare_bignum(num1,num2) == 0)
-                ans->head->num = 1;
-            else {
-                printf("num2_copy: ");
-                print_bignum(num2_copy);
-                printf("\n");
-                equalize_links(ans, num1);
-                _divide(num1, num2, ans, num2_copy);
-                //_div_c(num1,num2, mul_ptr, power , ans);
+                push(num2);
             }
-            push(ans);
+            else if(compare_for_div(num1,num2) < 0)
+                push(Q);
+            else if(compare_for_div(num1,num2) == 0)
+                push(F);
+            else {
+                div_helper(num1, num2,F, Q, R);
+                push(Q);
+            }
             continue;
         }
         else if(c == '+'){
@@ -456,6 +449,30 @@ bignum* init_mul_ptr(long length){
 }
 
 
+void div_helper(bignum *num1,bignum *num2,bignum * F,bignum *Q,bignum *R){
+    if(compare_for_div(num1,num2) < 0){
+        Q = init_mul_ptr(num1->number_of_links/2);
+        R = copy_bignum(num1);
+    }
+    else{
+        bignum * b = copy_bignum(num2);
+        _add(num2,b);
+        //free_bigNum(b);
+        bignum * f = copy_bignum(F);
+        _add(F,f);
+        //free_bigNum(f);
+        div_helper(num1,num2,F,Q,R);
+        if(compare_for_div(R,num2) >= 0 ){
+            print_bignum(Q);
+            printf("num1\n");
+            print_bignum(R);
+            printf("num2\n");
+            _add(Q,F);
+            _subtract(R,num2);
+        }
+    }
+}
+
 void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * ans){
     link * power_curr = power->last;
     while(compare_for_div(num1,num2) >= 0) {
@@ -500,8 +517,8 @@ int compare_for_div(bignum * bn1,bignum * bn2){
     return curr1->num - curr2->num;
 }
 
-void copy_bignum(bignum* bn,bignum* bn_copy) {
-    bn_copy = (bignum *) malloc(sizeof(bignum));
+bignum* copy_bignum(bignum* bn) {
+    bignum* bn_copy = (bignum *) malloc(sizeof(bignum));
     bn_copy->number_of_links = 1;
     bn_copy->head = (link *) malloc(sizeof(link));
     bn_copy->last = bn_copy->head;
@@ -518,4 +535,5 @@ void copy_bignum(bignum* bn,bignum* bn_copy) {
 
         curr = curr->next;
     }
+    return bn_copy;
 }
