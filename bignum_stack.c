@@ -56,7 +56,8 @@ extern void _subtract (bignum*, bignum*);
 extern void _multiply (bignum*, bignum*,bignum*);
 extern void _divide (bignum*, bignum*, bignum*, bignum*);
 
-
+//578 _86041776670101 * _64213 /
+// _5604610 126 / _8532008 * 34256143 *
 /**
  * bignum Stack
  *  SUPPORTED ops:
@@ -128,7 +129,7 @@ int main() {
                 push(num2);
             }
             else if(compare_for_div(num1,num2) < 0)
-                push(Q);
+                push(copy_bignum(Q));
             else if(compare_for_div(num1,num2) == 0)
                 push(F);
             else {
@@ -464,8 +465,6 @@ bignum* init_mul_ptr(long length){
     return result;
 }
 
-//not working 8842000346611 8416276064261 / p q
-// 84528 81130 / p q
 void div_helper(bignum *num1,bignum *num2,bignum * F){
     if(compare_for_div(num1,num2) < 0){
         Q = init_mul_ptr(num1->number_of_links/2);
