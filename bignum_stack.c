@@ -112,7 +112,7 @@ int main() {
             }
             else {
                 _multiply(num1, num2, result);
-                delete_zeros(result);
+                //delete_zeros(result);
                 push(result);
                 //free_bigNum(num1);
                 //free_bigNum(num2);
