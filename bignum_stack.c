@@ -103,11 +103,21 @@ int main() {
             equalize_links(num1,num2);
             if(num1->sign != num2->sign)
                 result->sign = 1;
-            _multiply (num1, num2,result);
-            delete_zeros(result);
-            push(result);
-            //free_bigNum(num1);
-            //free_bigNum(num2);
+            if(is_zero(num1)){
+                push(num1);
+                //free_bignum(num2);
+            }else if(is_zero(num2)){
+                push(num2);
+                //free_bignum(num1);
+            }
+            else {
+                _multiply(num1, num2, result);
+                delete_zeros(result);
+                push(result);
+                //free_bigNum(num1);
+                //free_bigNum(num2);
+            }
+
             //free_bigNum(bn);
             continue;
         }
@@ -131,7 +141,7 @@ int main() {
             else if(compare_for_div(num1,num2) < 0)
                 push(copy_bignum(Q));
             else if(compare_for_div(num1,num2) == 0)
-                push(F);
+                push(copy_bignum(F));
             else {
                 div_helper(num1, num2,F);
                 bignum * ans = copy_bignum(Q);
