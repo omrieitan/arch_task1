@@ -105,9 +105,9 @@ int main() {
             _multiply (num1, num2,result);
             delete_zeros(result);
             push(result);
-            free_bigNum(num1);
-            free_bigNum(num2);
-            free_bigNum(bn);
+            //free_bigNum(num1);
+            //free_bigNum(num2);
+            //free_bigNum(bn);
             continue;
         }
         else if(c == '/'){
@@ -129,11 +129,11 @@ int main() {
             else {
                 div_helper(num1, num2,F);
                 bignum * ans = copy_bignum(Q);
-                if(num1->sign ^ num2->sign)
+                if(num1->sign ^ num2->sign && is_zero(ans)!=1)
                     ans->sign=1;
-                free_bigNum(num1);
-                free_bigNum(num2);
-                free_bigNum(Q);
+                //free_bigNum(num1);
+                //free_bigNum(num2);
+                //free_bigNum(Q);
                 push(ans);
             }
             continue;
@@ -153,9 +153,9 @@ int main() {
             else {
                 _add(num1, num2);
                 push(num1);
-                free_bigNum(num2);
+                //free_bigNum(num2);
             }
-            free_bigNum(bn);
+            //free_bigNum(bn);
             continue;
         }
         else if(c == '-'){
@@ -167,20 +167,20 @@ int main() {
         }
         else if(c == 'p'){
             if(s.top == -1)
-                printf("stack empty");
+                printf("stack empty\n");
             else
                 print_bignum(s.arr[s.top]);
             printf("\n");
-            free_bigNum(bn);
+            //free_bigNum(bn);
             continue;
         }
         else if(c == 'c'){
             clear_stack();
-            free_bigNum(bn);
+            //free_bigNum(bn);
             continue;
         }
         else if(c == 'q') {
-            free_bigNum(bn);
+            //free_bigNum(bn);
             break;
         }
         else if(c == '_') {
@@ -358,24 +358,24 @@ void subtract(bignum* num1, bignum* num2){
     if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
         _subtract(num1, num2);
         push(num1);
-        free_bigNum(num2);
+        //free_bigNum(num2);
     }
     else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
         _subtract(num2, num1);
         num2->sign = 1 - num2->sign; // if =1 change to 0 , if =0 change to 1
         push(num2);
-        free_bigNum(num1);
+        //free_bigNum(num1);
     }
     else if(num1->sign ^ num2->sign){ // 3 4 5 8
         _add(num1, num2);
         push(num1);
-        free_bigNum(num2);
+        //free_bigNum(num2);
     }
     else if(comp == 0){
         _subtract(num1, num2);
         num1->sign = 0;
         push(num1);
-        free_bigNum(num2);
+        //free_bigNum(num2);
     }
 }
 
@@ -459,6 +459,7 @@ bignum* init_mul_ptr(long length){
     return result;
 }
 
+//not working 8842000346611 8416276064261 / p q
 void div_helper(bignum *num1,bignum *num2,bignum * F){
     if(compare_for_div(num1,num2) < 0){
         Q = init_mul_ptr(num1->number_of_links/2);
