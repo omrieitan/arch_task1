@@ -114,9 +114,14 @@ int main() {
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
-            Q = init_mul_ptr(num1->number_of_links/2);
-            R = init_mul_ptr(num1->number_of_links/2);
-            bignum* F = init_mul_ptr(num1->number_of_links/2);
+            int len=0;
+            if(num1->number_of_links%2 == 0)
+                len = (int) (num1->number_of_links / 2);
+            else
+                len = (int) (num1->number_of_links / 2) + 1;
+            Q = init_mul_ptr(len);
+            R = init_mul_ptr(len);
+            bignum* F = init_mul_ptr(len);
             F->last->num = 1;
             if(is_zero(num2)) {
                 printf("divide by zero\n");
@@ -268,7 +273,7 @@ int isEmpty(){
 void print_bignum(bignum *bn){
     int zeros = 0;
     link* curr = bn->head;
-    if(bn->sign)
+    if(bn->sign && is_zero(bn) == 0)
         printf("-");
     while(curr != 0) {
         if(zeros > 0 || curr->num!=0 || curr->next == 0) {
@@ -460,6 +465,7 @@ bignum* init_mul_ptr(long length){
 }
 
 //not working 8842000346611 8416276064261 / p q
+// 84528 81130 / p q
 void div_helper(bignum *num1,bignum *num2,bignum * F){
     if(compare_for_div(num1,num2) < 0){
         Q = init_mul_ptr(num1->number_of_links/2);
