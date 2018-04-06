@@ -328,6 +328,18 @@ void print_bignum(bignum *bn){
 
 }
 
+
+void free_bigNum(bignum * bn){
+    link * temp = bn->head;
+    while(bn->head!=0){
+        temp=bn->head;
+        bn->head=bn->head->next;
+        free(temp);
+    }
+    free(bn);
+}
+
+
 void clear_stack(){
     while(!isEmpty())
         free_bigNum(pop());
@@ -407,14 +419,7 @@ void subtract(bignum* num1, bignum* num2){
     }
 }
 
-void free_bigNum(bignum * bn){
-    link *temp;
-    for(int i=0; i<bn->number_of_links;i++){
-        temp=bn->head;
-        bn->head = bn->head->next;
-        free(temp);
-    }
-}
+
 
 bignum* init_mul_result(long length_num1,long length_num2){
     long length=((length_num1>=length_num2) ? length_num1 : length_num2)*2;
