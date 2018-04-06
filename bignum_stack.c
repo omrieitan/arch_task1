@@ -70,6 +70,9 @@ int isEmpty(void);
 void print_bignum(bignum *bn);
 void print_stack(void);
 void clear_stack(void);
+void free_push(bignum* toPush);
+bignum* free_pop ();
+void clear_free_stack(void);
 
 struct stack {
     bignum* arr[1024];
@@ -77,11 +80,13 @@ struct stack {
 };
 typedef struct stack STACK;
 STACK s; // the instance of stack we'll be using
+STACK sf;
 
 bignum* R;
 bignum* Q;
 
 int main() {
+    sf.top = -1;
     s.top = -1; // init stack
     while(1) {
         char c;
@@ -102,20 +107,18 @@ int main() {
                 result->sign = 1;
             if(is_zero(num1)){
                 push(num1);
-                //free_bignum(num2);
+                free_push(num2);
             }else if(is_zero(num2)){
                 push(num2);
-                //free_bignum(num1);
+                free_push(num1);
             }
             else {
                 _multiply(num1, num2, result);
-                //delete_zeros(result);
                 push(result);
-                //free_bigNum(num1);
-                //free_bigNum(num2);
+                free_push(num1);
+                free_push(num2);
             }
-
-            //free_bigNum(bn);
+            free_push(bn);
             continue;
         }
         else if(c == '/'){
@@ -144,9 +147,8 @@ int main() {
                 bignum * ans = copy_bignum(Q);
                 if(num1->sign ^ num2->sign && is_zero(ans)!=1)
                     ans->sign=1;
-                //free_bigNum(num1);
-                //free_bigNum(num2);
-                //free_bigNum(Q);
+                free_push(num1);
+                free_push(num2);
                 push(ans);
             }
             continue;
@@ -157,11 +159,11 @@ int main() {
             equalize_links(num1, num2);
             if (is_zero(num1)) {
                 push(num2);
-                //free_bignum(num1);
+                free_push(num1);
             }
             else if (is_zero(num2)) {
                 push(num1);
-                //free_bignum(num2);
+                free_push(num2);
             }
             else if(!num2->sign && num1->sign) {
                 num1->sign = 0;
@@ -174,9 +176,9 @@ int main() {
             else {
                 _add(num1, num2);
                 push(num1);
-                //free_bigNum(num2);
+                free_push(num2);
             }
-            //free_bigNum(bn);
+            free_push(bn);
             continue;
         }
         else if(c == '-'){
@@ -192,16 +194,16 @@ int main() {
             else
                 print_bignum(s.arr[s.top]);
             printf("\n");
-            //free_bigNum(bn);
+            free_push(bn);
             continue;
         }
         else if(c == 'c'){
             clear_stack();
-            //free_bigNum(bn);
+            free_push(bn);
             continue;
         }
         else if(c == 'q') {
-            //free_bigNum(bn);
+            free_push(bn);
             break;
         }
         else if(c == '_') {
@@ -230,6 +232,10 @@ int main() {
             break;
         }
     }
+    clear_stack();
+    clear_free_stack();
+//    free_bigNum(Q);
+//    free_bigNum(R);
     return 0;
 }
 
@@ -256,6 +262,19 @@ void push (bignum* toPush) {
     }
 }
 
+void free_push (bignum* toPush) {
+    if (sf.top == (1024 - 1))
+    {
+        printf ("Stack is Full\n");
+        return;
+    }
+    else
+    {
+        sf.top = sf.top + 1;
+        sf.arr[sf.top] = toPush;
+    }
+}
+
 /**
  * POP
  * return the top element of the stack and removes it.
@@ -277,6 +296,21 @@ bignum* pop () {
     return(num);
 }
 
+bignum* free_pop () {
+    bignum *num;
+    if (sf.top == - 1)
+    {
+        printf ("ERROR: Stack is Empty!\n");
+        exit(1);
+    }
+    else
+    {
+        num = sf.arr[sf.top];
+        sf.arr[sf.top]=0;
+        sf.top = sf.top - 1;
+    }
+    return(num);
+}
 
 /**
  * isEmpty
@@ -301,25 +335,13 @@ void print_bignum(bignum *bn){
 
 }
 
-void print_stack(){
-    if(isEmpty()) {
-        printf("Stack is Empty.\n");
-        return;
-    }
-    for(int i=s.top; i>=0; i--) {
-        if(i==0)
-            print_bignum(s.arr[i]);
-        else{
-            print_bignum(s.arr[i]);
-            printf (" ");
-        }
-    }
-    printf ("\n");
-}
-
 void clear_stack(){
     while(!isEmpty())
-        pop();
+        free_bigNum(pop());
+}
+void clear_free_stack(){
+    while(sf.top!=-1)
+        free_bigNum(free_pop());
 }
 
 void equalize_links(bignum* bn1, bignum* bn2){
@@ -362,38 +384,38 @@ void subtract(bignum* num1, bignum* num2){
     if (is_zero(num1)) {
         num2->sign=( num2->sign==1) ? 0 :1;
         push(num2);
-        //free_bignum(num1);
+        free_push(num1);
     }
     else if (is_zero(num2)) {
         push(num1);
-        //free_bignum(num2);
+        free_push(num2);
     }
     else if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
         _subtract(num1, num2);
         push(num1);
-        //free_bigNum(num2);
+        free_push(num2);
     }
     else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
         _subtract(num2, num1);
         num2->sign = 1 - num2->sign; // if =1 change to 0 , if =0 change to 1
         push(num2);
-        //free_bigNum(num1);
+        free_push(num1);
     }
     else if(num1->sign ^ num2->sign){ // 3 4 5 8
         _add(num1, num2);
         push(num1);
-        //free_bigNum(num2);
+        free_push(num2);
     }
     else if(comp == 0){
         _subtract(num1, num2);
         num1->sign = 0;
         push(num1);
-        //free_bigNum(num2);
+        free_push(num2);
     }
 }
 
 void free_bigNum(bignum * bn){
-    link *temp = bn->head;
+    link *temp;
     for(int i=0; i<bn->number_of_links;i++){
         temp=bn->head;
         bn->head=bn->head->next;
