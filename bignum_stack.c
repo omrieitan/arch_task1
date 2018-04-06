@@ -99,10 +99,6 @@ int main() {
         if(c == '*'){
             bignum* num2 = pop();
             bignum* num1 = pop();
-            bignum* result= init_mul_result(num1->number_of_links,num2->number_of_links);
-            equalize_links(num1,num2);
-            if(num1->sign != num2->sign)
-                result->sign = 1;
             if(is_zero(num1)){
                 push(num1);
                 free_push(num2);
@@ -111,6 +107,10 @@ int main() {
                 free_push(num1);
             }
             else {
+                bignum* result= init_mul_result(num1->number_of_links,num2->number_of_links);
+                equalize_links(num1,num2);
+                if(num1->sign != num2->sign)
+                    result->sign = 1;
                 _multiply(num1, num2, result);
                 push(result);
                 free_push(num1);
@@ -185,7 +185,7 @@ int main() {
         }
         else if(c == 'p'){
             if(s.top == -1)
-                printf("stack empty\n");
+                printf("stack empty");
             else
                 print_bignum(s.arr[s.top]);
             printf("\n");
@@ -505,6 +505,8 @@ void div_helper(bignum *num1,bignum *num2,bignum * F){
             _add(Q,F);
             _subtract(R,num2);
         }
+        free_push(f1);
+        free_push(b1);
     }
 }
 
