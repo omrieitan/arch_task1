@@ -70,6 +70,8 @@ int isEmpty(void);
 void print_bignum(bignum *bn);
 void print_stack(void);
 void clear_stack(void);
+
+// for the implementation of garbage collector stack
 void free_push(bignum* toPush);
 bignum* free_pop ();
 void clear_free_stack(void);
@@ -80,23 +82,19 @@ struct stack {
 };
 typedef struct stack STACK;
 STACK s; // the instance of stack we'll be using
-STACK sf;
+STACK sf; // garbage collector stack
 
 bignum* R;
 bignum* Q;
 
 int main() {
-    sf.top = -1;
+    sf.top = -1; // init garbage collector
     s.top = -1; // init stack
     while(1) {
         char c;
         c = (char) getchar();
         if(c == ' ' || c == '\n')
             continue;
-        bignum* bn= (bignum*) malloc(sizeof(bignum));
-        bn->number_of_links = 1;
-        bn->head = (link*) malloc(sizeof(link));
-        bn->last = bn->head;
 
         if(c == '*'){
             bignum* num2 = pop();
@@ -118,7 +116,6 @@ int main() {
                 free_push(num1);
                 free_push(num2);
             }
-            free_push(bn);
             continue;
         }
         else if(c == '/'){
@@ -178,14 +175,12 @@ int main() {
                 push(num1);
                 free_push(num2);
             }
-            free_push(bn);
             continue;
         }
         else if(c == '-'){
             bignum* num2 = pop();
             bignum* num1 = pop();
             subtract(num1,num2);
-
             continue;
         }
         else if(c == 'p'){
@@ -194,19 +189,20 @@ int main() {
             else
                 print_bignum(s.arr[s.top]);
             printf("\n");
-            free_push(bn);
             continue;
         }
         else if(c == 'c'){
             clear_stack();
-            free_push(bn);
             continue;
         }
         else if(c == 'q') {
-            free_push(bn);
             break;
         }
-        else if(c == '_') {
+        bignum* bn = (bignum*) malloc(sizeof(bignum));
+        bn->number_of_links = 1;
+        bn->head = (link*) malloc(sizeof(link));
+        bn->last = bn->head;
+        if(c == '_') {
             bn->sign = 1;
             c = (char) getchar();
             bn->head->num = (c - '0');
