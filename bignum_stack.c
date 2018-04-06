@@ -30,7 +30,6 @@ typedef struct bignum { // sizeof = 32 bit
 void equalize_links(bignum* bn1, bignum* bn2);
 void add_carry(bignum* bn);
 void sub_borrow(bignum* bn);
-int compare_bignum(bignum* bn1, bignum* bn2);
 void subtract(bignum* num1, bignum* num2);
 void free_bigNum(bignum * bn);
 bignum* init_mul_result(long length_num1,long length_num2);
@@ -56,8 +55,6 @@ extern void _subtract (bignum*, bignum*);
 extern void _multiply (bignum*, bignum*,bignum*);
 extern void _divide (bignum*, bignum*, bignum*, bignum*);
 
-//578 _86041776670101 * _64213 /
-// _5604610 126 / _8532008 * 34256143 *
 /**
  * bignum Stack
  *  SUPPORTED ops:
@@ -360,25 +357,8 @@ void sub_borrow(bignum* bn){
     bn->number_of_links --;
 }
 
-int compare_bignum(bignum* bn1, bignum* bn2){
-    int ans = (int) (bn1->number_of_links - bn2->number_of_links);
-    equalize_links(bn1,bn2);
-    if (ans!=0)
-        return ans;
-    link* curr1=bn1->head;
-    link* curr2 = bn2->head;
-    while(curr1!=0 && curr1->num == curr2->num){
-        curr1 = curr1->next;
-        curr2 = curr2->next;
-    }
-    if(curr1 == 0)
-        return 0;
-    return curr1->num - curr2->num;
-
-}
-
 void subtract(bignum* num1, bignum* num2){
-    int comp = compare_bignum(num1,num2);
+    int comp = compare_for_div(num1,num2);
     if (is_zero(num1)) {
         num2->sign=( num2->sign==1) ? 0 :1;
         push(num2);
