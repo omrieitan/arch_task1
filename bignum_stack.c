@@ -154,11 +154,19 @@ int main() {
             }
             continue;
         }
-        else if(c == '+'){
-            bignum* num2 = pop();
-            bignum* num1 = pop();
-            equalize_links(num1,num2);
-            if(!num2->sign && num1->sign) {
+        else if(c == '+') {
+            bignum *num2 = pop();
+            bignum *num1 = pop();
+            equalize_links(num1, num2);
+            if (is_zero(num1)) {
+                push(num2);
+                //free_bignum(num1);
+            }
+            else if (is_zero(num2)) {
+                push(num1);
+                //free_bignum(num2);
+            }
+            else if(!num2->sign && num1->sign) {
                 num1->sign = 0;
                 subtract(num2, num1);
             }
@@ -371,7 +379,16 @@ int compare_bignum(bignum* bn1, bignum* bn2){
 
 void subtract(bignum* num1, bignum* num2){
     int comp = compare_bignum(num1,num2);
-    if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
+    if (is_zero(num1)) {
+        num2->sign=( num2->sign==1) ? 0 :1;
+        push(num2);
+        //free_bignum(num1);
+    }
+    else if (is_zero(num2)) {
+        push(num1);
+        //free_bignum(num2);
+    }
+    else if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
         _subtract(num1, num2);
         push(num1);
         //free_bigNum(num2);
