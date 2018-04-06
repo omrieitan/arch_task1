@@ -34,9 +34,6 @@ void subtract(bignum* num1, bignum* num2);
 void free_bigNum(bignum * bn);
 bignum* init_mul_result(long length_num1,long length_num2);
 int is_zero(bignum* bn1);
-void add_zero(bignum* bn1,bignum* bn2);
-void delete_zeros(bignum * bn);
-void _div_c(bignum *num1,bignum *num2,bignum * mul_ptr,bignum * power ,bignum * ans);
 bignum* init_mul_ptr(long length);
 int compare_for_div(bignum * bn1,bignum * bn2);
 bignum* copy_bignum(bignum* bn);
@@ -386,18 +383,18 @@ void subtract(bignum* num1, bignum* num2){
         push(num1);
         free_push(num2);
     }
-    else if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) { // 1 6
+    else if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) {
         _subtract(num1, num2);
         push(num1);
         free_push(num2);
     }
-    else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){ // 2 7
+    else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){
         _subtract(num2, num1);
-        num2->sign = 1 - num2->sign; // if =1 change to 0 , if =0 change to 1
+        num2->sign = 1 - num2->sign;
         push(num2);
         free_push(num1);
     }
-    else if(num1->sign ^ num2->sign){ // 3 4 5 8
+    else if(num1->sign ^ num2->sign){
         _add(num1, num2);
         push(num1);
         free_push(num2);
@@ -414,7 +411,7 @@ void free_bigNum(bignum * bn){
     link *temp;
     for(int i=0; i<bn->number_of_links;i++){
         temp=bn->head;
-        bn->head=bn->head->next;
+        bn->head = bn->head->next;
         free(temp);
     }
 }
@@ -445,32 +442,6 @@ int is_zero(bignum* bn1){
         curr = curr->next;
     }
     return 1;
-}
-
-void add_zero(bignum* bn1,bignum* bn2){
-    link* newLink = (link*) malloc(sizeof(link));
-    newLink->num = 0;
-    newLink->next = bn1->head;
-    bn1->head->prev = newLink;
-    bn1->head = newLink;
-    bn1->number_of_links++;
-
-    link* newLink2 = (link*) malloc(sizeof(link));
-    newLink2->num = 0;
-    newLink2->next = bn2->head;
-    bn2->head->prev = newLink2;
-    bn2->head = newLink2;
-    bn2->number_of_links++;
-
-}
-
-
-void delete_zeros(bignum * bn){
-    while(bn->head->num == 0 && bn->number_of_links!=1){
-        bn->head=bn->head->next;
-        free(bn->head->prev);
-        bn->number_of_links--;
-    }
 }
 
 bignum* init_mul_ptr(long length){
@@ -539,7 +510,6 @@ bignum* copy_bignum(bignum* bn) {
         bn_copy->last->next = newLink;
         bn_copy->last = newLink;
         bn_copy->number_of_links++;
-
         curr = curr->next;
     }
     return bn_copy;
