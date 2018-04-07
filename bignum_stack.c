@@ -74,7 +74,7 @@ bignum* free_pop ();
 void clear_free_stack(void);
 
 struct stack {
-    bignum* arr[1024];
+    bignum* arr[2048];
     int top;
 };
 typedef struct stack STACK;
@@ -257,15 +257,10 @@ void push (bignum* toPush) {
 
 void free_push (bignum* toPush) {
     if (sf.top == (1024 - 1))
-    {
-        printf ("Stack is Full\n");
-        return;
-    }
-    else
-    {
-        sf.top = sf.top + 1;
-        sf.arr[sf.top] = toPush;
-    }
+        clear_free_stack();
+
+    sf.top = sf.top + 1;
+    sf.arr[sf.top] = toPush;
 }
 
 /**
