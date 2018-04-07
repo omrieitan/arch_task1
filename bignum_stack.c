@@ -135,23 +135,26 @@ int main()  {
                 len = (int) (num1->number_of_links / 2) + 1;
             Q = init_mul_ptr(len);
             R = init_mul_ptr(len);
-            bignum* F = init_mul_ptr(len);
-            F->last->num = 1;
             if(is_zero(num2)) {
                 printf("divide by zero\n");
                 push(num2);
             }
             else if(compare_for_div(num1,num2) < 0)
                 push(copy_bignum(Q));
-            else if(compare_for_div(num1,num2) == 0)
-                push(copy_bignum(F));
+            else if(compare_for_div(num1,num2) == 0) {
+                Q->last->num = 1;
+                push(copy_bignum(Q));
+            }
             else {
+                bignum* F = init_mul_ptr(len);
+                F->last->num = 1;
                 div_helper(num1, num2,F);
                 bignum * ans = copy_bignum(Q);
                 if(num1->sign ^ num2->sign && is_zero(ans)!=1)
                     ans->sign=1;
                 add_to_garbage_collector(num1);
                 add_to_garbage_collector(num2);
+                add_to_garbage_collector(F);
                 push(ans);
             }
             continue;
