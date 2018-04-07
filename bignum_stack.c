@@ -65,7 +65,6 @@ void push(bignum* toPush);
 bignum*  pop(void);
 int isEmpty(void);
 void print_bignum(bignum *bn);
-void print_stack(void);
 void clear_stack(void);
 
 // for the implementation of garbage collector stack
@@ -243,7 +242,7 @@ int main() {
  * @param bigNum pointer
  */
 void push (bignum* toPush) {
-    if (s.top == (1024 - 1))
+    if (s.top == (2048 - 1))
     {
         printf ("Stack is Full\n");
         return;
@@ -256,7 +255,7 @@ void push (bignum* toPush) {
 }
 
 void free_push (bignum* toPush) {
-    if (sf.top == (1024 - 1))
+    if (sf.top == (2048 - 1))
         clear_free_stack();
 
     sf.top = sf.top + 1;
@@ -309,6 +308,10 @@ int isEmpty(){
 }
 
 void print_bignum(bignum *bn){
+    if(bn == 0) {
+        printf("num is null!!!\n");
+        return;
+    }
     int zeros = 0;
     link* curr = bn->head;
     if(bn->sign && is_zero(bn) == 0)
@@ -325,7 +328,7 @@ void print_bignum(bignum *bn){
 
 
 void free_bigNum(bignum * bn){
-    link * temp = bn->head;
+    link * temp;
     while(bn->head!=0){
         temp=bn->head;
         bn->head=bn->head->next;
@@ -476,8 +479,10 @@ void div_helper(bignum *num1,bignum *num2,bignum * F){
             _add(Q,F);
             _subtract(R,num2);
         }
-        free_push(f1);
-        free_push(b1);
+        if(sf.top != 2047) {
+            free_push(f1);
+            free_push(b1);
+        }
     }
 }
 
