@@ -128,6 +128,11 @@ int main()  {
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
+            if(is_zero(num2)) {
+                add_to_garbage_collector(num1);
+                add_to_garbage_collector(num2);
+                continue; // if divide by zero
+            }
             int len=0;
             if(num1->number_of_links%2 == 0)
                 len = (int) (num1->number_of_links / 2);
@@ -135,10 +140,8 @@ int main()  {
                 len = (int) (num1->number_of_links / 2) + 1;
             Q = init_mul_ptr(len);
             R = init_mul_ptr(len);
-            if(is_zero(num2)) {
-                continue; // if divide by zero
-            }
-            else if(compare(num1,num2) < 0)
+
+            if(compare(num1,num2) < 0)
                 push(copy_bignum(Q));
             else if(compare(num1,num2) == 0) {
                 Q->last->num = 1;
