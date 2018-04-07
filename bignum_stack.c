@@ -35,7 +35,7 @@ void free_bigNum(bignum * bn);
 bignum* init_mul_result(long length_num1,long length_num2);
 int is_zero(bignum* bn1);
 bignum* init_mul_ptr(long length);
-int compare_for_div(bignum * bn1,bignum * bn2);
+int compare(bignum * bn1,bignum * bn2);
 bignum* copy_bignum(bignum* bn);
 void div_helper(bignum *num1,bignum *num2,bignum * F);
 
@@ -139,9 +139,9 @@ int main()  {
                 printf("divide by zero\n");
                 push(num2);
             }
-            else if(compare_for_div(num1,num2) < 0)
+            else if(compare(num1,num2) < 0)
                 push(copy_bignum(Q));
-            else if(compare_for_div(num1,num2) == 0) {
+            else if(compare(num1,num2) == 0) {
                 Q->last->num = 1;
                 push(copy_bignum(Q));
             }
@@ -408,7 +408,7 @@ void sub_borrow(bignum* bn){
 }
 
 void subtract(bignum* num1, bignum* num2){
-    int comp = compare_for_div(num1,num2);
+    int comp = compare(num1,num2);
     if (is_zero(num1)) {
         num2->sign=( num2->sign==1) ? 0 :1;
         push(num2);
@@ -490,7 +490,7 @@ bignum* init_mul_ptr(long length){
 }
 
 void div_helper(bignum *num1,bignum *num2,bignum * F){
-    if(compare_for_div(num1,num2) < 0){
+    if(compare(num1,num2) < 0){
         Q = init_mul_ptr(num1->number_of_links/2);
         R = num1;
     }
@@ -500,7 +500,7 @@ void div_helper(bignum *num1,bignum *num2,bignum * F){
         bignum * f1 = copy_bignum(F);
         _add(f1,F);
         div_helper(num1,b1,f1);
-        if(compare_for_div(R,num2) >= 0 ){
+        if(compare(R,num2) >= 0 ){
             _add(Q,F);
             _subtract(R,num2);
         }
@@ -510,7 +510,7 @@ void div_helper(bignum *num1,bignum *num2,bignum * F){
 }
 
 
-int compare_for_div(bignum * bn1,bignum * bn2){
+int compare(bignum * bn1,bignum * bn2){
     equalize_links(bn1,bn2);
     link* curr1 = bn1->head;
     link* curr2 = bn2->head;
