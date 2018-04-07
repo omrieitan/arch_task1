@@ -69,23 +69,32 @@ void print_stack(void);
 void clear_stack(void);
 
 // for the implementation of garbage collector stack
-void free_push(bignum* toPush);
+void add_to_garbage_collector(bignum* toPush);
 bignum* free_pop ();
-void clear_free_stack(void);
+void clear_garbage_collector(void);
 
 struct stack {
     bignum* arr[2048];
     int top;
 };
+
+struct Collector {
+    bignum** stack;
+    int top;
+    int size;
+};
+
 typedef struct stack STACK;
 STACK s; // the instance of stack we'll be using
-STACK sf; // garbage collector stack
+struct Collector garbage_collector; // garbage collector stack
 
 bignum* R;
 bignum* Q;
 
-int main() {
-    sf.top = -1; // init garbage collector
+int main()  {
+    garbage_collector.stack=(bignum**)malloc(1024* sizeof(bignum*));
+    garbage_collector.size=1024;
+    garbage_collector.top=-1;
     s.top = -1; // init stack
     while(1) {
         char c;
@@ -98,10 +107,10 @@ int main() {
             bignum* num1 = pop();
             if(is_zero(num1)){
                 push(num1);
-                free_push(num2);
+                add_to_garbage_collector(num2);
             }else if(is_zero(num2)){
                 push(num2);
-                free_push(num1);
+                add_to_garbage_collector(num1);
             }
             else {
                 bignum* result= init_mul_result(num1->number_of_links,num2->number_of_links);
@@ -110,8 +119,8 @@ int main() {
                     result->sign = 1;
                 _multiply(num1, num2, result);
                 push(result);
-                free_push(num1);
-                free_push(num2);
+                add_to_garbage_collector(num1);
+                add_to_garbage_collector(num2);
             }
             continue;
         }
@@ -141,8 +150,8 @@ int main() {
                 bignum * ans = copy_bignum(Q);
                 if(num1->sign ^ num2->sign && is_zero(ans)!=1)
                     ans->sign=1;
-                free_push(num1);
-                free_push(num2);
+                add_to_garbage_collector(num1);
+                add_to_garbage_collector(num2);
                 push(ans);
             }
             continue;
@@ -153,11 +162,11 @@ int main() {
             equalize_links(num1, num2);
             if (is_zero(num1)) {
                 push(num2);
-                free_push(num1);
+                add_to_garbage_collector(num1);
             }
             else if (is_zero(num2)) {
                 push(num1);
-                free_push(num2);
+                add_to_garbage_collector(num2);
             }
             else if(!num2->sign && num1->sign) {
                 num1->sign = 0;
@@ -170,7 +179,7 @@ int main() {
             else {
                 _add(num1, num2);
                 push(num1);
-                free_push(num2);
+                add_to_garbage_collector(num2);
             }
             continue;
         }
@@ -183,8 +192,10 @@ int main() {
         else if(c == 'p'){
             if(s.top == -1)
                 printf("stack empty");
-            else
+            else {
                 print_bignum(s.arr[s.top]);
+                clear_garbage_collector();
+            }
             printf("\n");
             continue;
         }
@@ -226,9 +237,11 @@ int main() {
         }
     }
     clear_stack();
-    clear_free_stack();
-//    free_bigNum(Q);
-//    free_bigNum(R);
+    //add_to_garbage_collector(Q);
+    //add_to_garbage_collector(R);
+    clear_garbage_collector();
+    free(garbage_collector.stack);
+
     return 0;
 }
 
@@ -255,12 +268,24 @@ void push (bignum* toPush) {
     }
 }
 
-void free_push (bignum* toPush) {
-    if (sf.top == (1024 - 1))
-        clear_free_stack();
+void add_to_garbage_collector (bignum* toPush) {
+    if (garbage_collector.top == (garbage_collector.size - 1)) {
+        garbage_collector.size+=1000;
+        bignum** temp;
+        temp = (bignum**)realloc(garbage_collector.stack,garbage_collector.size* sizeof(bignum*));
+        if(temp){
+            garbage_collector.stack=temp;
+        }
+        else{
+            temp = (bignum**)malloc(garbage_collector.size* sizeof(bignum*));
+            for(int i = 0; i< garbage_collector.size-1000;temp[++i]=garbage_collector.stack[i]);
+            free(garbage_collector.stack);
+            garbage_collector.stack=temp;
+        }
+    }
 
-    sf.top = sf.top + 1;
-    sf.arr[sf.top] = toPush;
+    garbage_collector.top = garbage_collector.top + 1;
+    garbage_collector.stack[garbage_collector.top] = toPush;
 }
 
 /**
@@ -286,16 +311,15 @@ bignum* pop () {
 
 bignum* free_pop () {
     bignum *num;
-    if (sf.top == - 1)
+    if (garbage_collector.top == - 1)
     {
-        printf ("ERROR: Stack is Empty!\n");
-        exit(1);
+        return 0 ;
     }
     else
     {
-        num = sf.arr[sf.top];
-        sf.arr[sf.top]=0;
-        sf.top = sf.top - 1;
+        num = garbage_collector.stack[garbage_collector.top];
+        garbage_collector.stack[garbage_collector.top]=0;
+        garbage_collector.top = garbage_collector.top - 1;
     }
     return(num);
 }
@@ -339,8 +363,9 @@ void clear_stack(){
     while(!isEmpty())
         free_bigNum(pop());
 }
-void clear_free_stack(){
-    while(sf.top!=-1)
+
+void clear_garbage_collector(){
+    while(garbage_collector.top!=-1)
         free_bigNum(free_pop());
 }
 
@@ -384,33 +409,33 @@ void subtract(bignum* num1, bignum* num2){
     if (is_zero(num1)) {
         num2->sign=( num2->sign==1) ? 0 :1;
         push(num2);
-        free_push(num1);
+        add_to_garbage_collector(num1);
     }
     else if (is_zero(num2)) {
         push(num1);
-        free_push(num2);
+        add_to_garbage_collector(num2);
     }
     else if (comp > 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)) {
         _subtract(num1, num2);
         push(num1);
-        free_push(num2);
+        add_to_garbage_collector(num2);
     }
     else if(comp < 0 && (num1->sign+num2->sign == 0 || num1->sign+num2->sign == 2)){
         _subtract(num2, num1);
         num2->sign = 1 - num2->sign;
         push(num2);
-        free_push(num1);
+        add_to_garbage_collector(num1);
     }
     else if(num1->sign ^ num2->sign){
         _add(num1, num2);
         push(num1);
-        free_push(num2);
+        add_to_garbage_collector(num2);
     }
     else if(comp == 0){
         _subtract(num1, num2);
         num1->sign = 0;
         push(num1);
-        free_push(num2);
+        add_to_garbage_collector(num2);
     }
 }
 
@@ -476,8 +501,8 @@ void div_helper(bignum *num1,bignum *num2,bignum * F){
             _add(Q,F);
             _subtract(R,num2);
         }
-        free_push(f1);
-        free_push(b1);
+        add_to_garbage_collector(f1);
+        add_to_garbage_collector(b1);
     }
 }
 
