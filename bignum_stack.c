@@ -136,8 +136,7 @@ int main()  {
             Q = init_mul_ptr(len);
             R = init_mul_ptr(len);
             if(is_zero(num2)) {
-                printf("divide by zero\n");
-                push(num2);
+                continue; // if divide by zero
             }
             else if(compare(num1,num2) < 0)
                 push(copy_bignum(Q));
