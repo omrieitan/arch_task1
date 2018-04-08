@@ -50,7 +50,6 @@ void div_helper(bignum *num1,bignum *num2,bignum * F);
 extern void _add (bignum*, bignum*);
 extern void _subtract (bignum*, bignum*);
 extern void _multiply (bignum*, bignum*,bignum*);
-extern void _divide (bignum*, bignum*, bignum*, bignum*);
 
 /**
  * bignum Stack
@@ -65,7 +64,6 @@ void push(bignum* toPush);
 bignum*  pop(void);
 int isEmpty(void);
 void print_bignum(bignum *bn);
-void print_stack(void);
 void clear_stack(void);
 
 // for the implementation of garbage collector stack
@@ -131,7 +129,12 @@ int main()  {
             if(is_zero(num2)) {
                 add_to_garbage_collector(num1);
                 add_to_garbage_collector(num2);
-                continue; // if divide by zero
+                printf("divide by zero\n");
+                continue;
+            }
+            else if(is_zero(num1)) {
+                push(num1);
+                add_to_garbage_collector(num2);
             }
             int len=0;
             if(num1->number_of_links%2 == 0)
@@ -302,7 +305,7 @@ bignum* pop () {
     bignum *num;
     if (s.top == - 1)
     {
-        printf ("ERROR: Stack is Empty!\n");
+        printf ("stack empty\n");
         exit(1);
     }
     else
@@ -477,6 +480,7 @@ int is_zero(bignum* bn1){
 bignum* init_mul_ptr(long length){
     long new_length = length*2;
     bignum* result= (bignum*) malloc(sizeof(bignum));
+    result->sign = 0;
     result->number_of_links = new_length;
     result->head = (link*) malloc(sizeof(link));
     result->last = result->head;
@@ -531,7 +535,7 @@ bignum* copy_bignum(bignum* bn) {
     bn_copy->head = (link *) malloc(sizeof(link));
     bn_copy->last = bn_copy->head;
     bn_copy->head->num = bn->head->num;
-
+    bn_copy->sign = bn->sign;
     link *curr = bn->head->next;
     while (curr != 0) {
         link *newLink = (link *) malloc(sizeof(link));
