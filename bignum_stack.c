@@ -4,9 +4,7 @@
 /**
  * LINK for bignum implementation
  *     two sides in order to maintain a connection to the rest of the links
- *     array of integer, of size 18 to hold the number. 18 is the maximal digit number that
- *     can be held in a long variable.
- *     used: an integer to determine how match cells in the array are we using
+ *     holds an int that represent a digit of a bignum.
  */
 typedef struct link { // sizeof = 24 bit
     struct link * next;
@@ -16,9 +14,9 @@ typedef struct link { // sizeof = 24 bit
 
 /**
  * BIGNUM data structure for holding big integers
- *     number_of_digits: long to hold the number of digits in the big integer
- *     sign: the bit sign 0 for positive and 1 for negative
- *     head and last pointers : holding the first and last chunks of the number
+ *     @param number_of_links: long to hold the number of digits in the big integer
+ *     @param sign: the bit sign 0 for positive and 1 for negative
+ *     @param head and last pointers : holding the first and last links
  */
 typedef struct bignum { // sizeof = 32 bit
     long number_of_links;
@@ -27,6 +25,44 @@ typedef struct bignum { // sizeof = 32 bit
     link *last;
 } bignum;
 
+/**
+ * STACK is an implementation of a stack that contains bignums
+ *      @param arr: array of pointers to bignums
+ *      @param top: the index of the top bignum in the stack
+ */
+struct stack {
+    bignum* arr[2048];
+    int top;
+};
+typedef struct stack STACK;
+
+/**
+ * **************garbage collector data structure*******************
+ * @param : pointers to bignums dynamic array
+ * @param : top indicator
+ * @param : size of the daynamic array
+ *
+ * @discripation : all the garbage values will be inserted into
+ *                 this data structure, when the array will reach
+ *                 its maximum capacity, the data structure will
+ *                 re-alocate the array with a a new size of
+ *                 @val size = size + 1000. if allocation failed
+ *                 the data structure will use the @function malloc
+ *                 to search for a new space to hold the array
+ *
+ * @method clear_garbege_collector: clear the data structure, does not re-aloced the array
+ * @method add_to_garbege_collector: add a @val bignum to the data structure
+ * @method free_pop: free the last element in the array of the data structure
+ * @method free_bigNum: free the memory allocated for the big num
+ */
+struct Collector {
+    bignum** stack;
+    int top;
+    int size;
+};
+
+
+// helping methods for
 void equalize_links(bignum* bn1, bignum* bn2);
 void add_carry(bignum* bn);
 void sub_borrow(bignum* bn);
@@ -71,21 +107,10 @@ void add_to_garbage_collector(bignum* toPush);
 bignum* free_pop ();
 void clear_garbage_collector(void);
 
-struct stack {
-    bignum* arr[2048];
-    int top;
-};
 
-struct Collector {
-    bignum** stack;
-    int top;
-    int size;
-};
-
-typedef struct stack STACK;
 STACK s; // the instance of stack we'll be using
 struct Collector garbage_collector; // garbage collector stack
-
+// global args for division
 bignum* R;
 bignum* Q;
 
@@ -96,11 +121,11 @@ int main()  {
     s.top = -1; // init stack
     while(1) {
         char c;
-        c = (char) getchar();
+        c = (char) getchar(); // read input from stdin
         if(c == ' ' || c == '\n')
             continue;
 
-        if(c == '*'){
+        if(c == '*'){ // multiply operation
             bignum* num2 = pop();
             bignum* num1 = pop();
             if(is_zero(num1)){
@@ -122,7 +147,7 @@ int main()  {
             }
             continue;
         }
-        else if(c == '/'){
+        else if(c == '/'){ // divide operation
             bignum* num2 = pop();
             bignum* num1 = pop();
             equalize_links(num1,num2);
@@ -164,7 +189,7 @@ int main()  {
             }
             continue;
         }
-        else if(c == '+') {
+        else if(c == '+') { // add operation
             bignum *num2 = pop();
             bignum *num1 = pop();
             equalize_links(num1, num2);
@@ -191,13 +216,13 @@ int main()  {
             }
             continue;
         }
-        else if(c == '-'){
+        else if(c == '-'){ // subtract operation
             bignum* num2 = pop();
             bignum* num1 = pop();
             subtract(num1,num2);
             continue;
         }
-        else if(c == 'p'){
+        else if(c == 'p'){ // press p to print the top bignum
             if(s.top == -1)
                 printf("stack empty");
             else {
@@ -207,11 +232,11 @@ int main()  {
             printf("\n");
             continue;
         }
-        else if(c == 'c'){
+        else if(c == 'c'){ // press c to clear stack
             clear_stack();
             continue;
         }
-        else if(c == 'q') {
+        else if(c == 'q') { // press q to quit
             break;
         }
         bignum* bn = (bignum*) malloc(sizeof(bignum));
@@ -244,9 +269,8 @@ int main()  {
             break;
         }
     }
+    // free memory before terminating
     clear_stack();
-    //add_to_garbage_collector(Q);
-    //add_to_garbage_collector(R);
     clear_garbage_collector();
     free(garbage_collector.stack);
 
@@ -276,6 +300,15 @@ void push (bignum* toPush) {
     }
 }
 
+/**
+ * COLLECTOR method :add_to_garbage_collector:
+ *                  this method will
+ *                  re-alocate the array with a a new size of
+ *                  @val size = size + 1000. if allocation failed
+ *                  the array will be re-alocded using @function malloc
+ *                  whitch will search for a new space to hold the array
+ * @param bignum
+ */
 void add_to_garbage_collector (bignum* toPush) {
     if (garbage_collector.top == (garbage_collector.size - 1)) {
         garbage_collector.size+=1000;
@@ -317,6 +350,14 @@ bignum* pop () {
     return(num);
 }
 
+/**
+ * COLLECTOR method :free_pop:
+ *                  the method will remove the last element
+ *                  in the array, and will add it to the
+ *                  COLLECTOR data structure.
+ * @param void
+ * @return bignum
+ */
 bignum* free_pop () {
     bignum *num;
     if (garbage_collector.top == - 1)
@@ -340,6 +381,9 @@ int isEmpty(){
     return s.top == -1;
 }
 
+/**
+ * prints bignum digit by digit
+ */
 void print_bignum(bignum *bn){
     int zeros = 0;
     link* curr = bn->head;
@@ -355,9 +399,15 @@ void print_bignum(bignum *bn){
 
 }
 
-
+/**
+ * COLLECTOR method :free_bigNum
+ *                  this @method will run over
+ *                  the @val links of the recieved bignum
+ *                  and free each @val link
+ * @param bignum
+ */
 void free_bigNum(bignum * bn){
-    link * temp = bn->head;
+    link * temp;
     while(bn->head!=0){
         temp=bn->head;
         bn->head=bn->head->next;
@@ -366,17 +416,31 @@ void free_bigNum(bignum * bn){
     free(bn);
 }
 
-
+/**
+ * pop all elements from the stack
+ * add to garbage collector each bignum popped
+ */
 void clear_stack(){
     while(!isEmpty())
-        free_bigNum(pop());
+        add_to_garbage_collector(pop());
 }
 
+/**
+* COLLECTOR method :clear_garbage_collector
+*                  the @method will empty the array
+*                  and free the memory of each bignum
+*                  the was pulled from it.
+* @param void
+*/
 void clear_garbage_collector(){
     while(garbage_collector.top!=-1)
         free_bigNum(free_pop());
 }
 
+/**
+ *  gets two bignums and padd the shorter one with
+ *  zero from the head side till they have the same number_of_links
+ */
 void equalize_links(bignum* bn1, bignum* bn2){
     while(bn1->number_of_links > bn2->number_of_links){
         link* newLink = (link*) malloc(sizeof(link));
@@ -396,6 +460,9 @@ void equalize_links(bignum* bn1, bignum* bn2){
     }
 }
 
+/**
+ *  used for add operation to append another link at the end if needed
+ */
 void add_carry(bignum* bn){
     link* newLink = (link*) malloc(sizeof(link));
     newLink->num = 1;
@@ -405,6 +472,9 @@ void add_carry(bignum* bn){
     bn->number_of_links ++;
 }
 
+/**
+ * used for subtract operation to delete the most significant digit from bignum if needed
+ */
 void sub_borrow(bignum* bn){
     link* oldLink = bn->head;
     bn->head = bn->head->next;
@@ -412,6 +482,10 @@ void sub_borrow(bignum* bn){
     bn->number_of_links --;
 }
 
+/**
+ * a helper function for subtract operation
+ * num1 <- num1 - num2
+ */
 void subtract(bignum* num1, bignum* num2){
     int comp = compare(num1,num2);
     if (is_zero(num1)) {
@@ -447,8 +521,9 @@ void subtract(bignum* num1, bignum* num2){
     }
 }
 
-
-
+/**
+ * generate a new bignum that equals to zero with MAX(length_num1, length_num2)*2 digits
+ */
 bignum* init_mul_result(long length_num1,long length_num2){
     long length=((length_num1>=length_num2) ? length_num1 : length_num2)*2;
     bignum* result= (bignum*) malloc(sizeof(bignum));
@@ -467,6 +542,10 @@ bignum* init_mul_result(long length_num1,long length_num2){
     return result;
 }
 
+/**
+ * check if given bignum equals to zero
+ * @return 1 if zero, else return 0
+ */
 int is_zero(bignum* bn1){
     link* curr = bn1->head;
     while(curr!=0) {
@@ -477,6 +556,9 @@ int is_zero(bignum* bn1){
     return 1;
 }
 
+/**
+ * generate a new bignum that equals to zero with length*2 digits
+ */
 bignum* init_mul_ptr(long length){
     long new_length = length*2;
     bignum* result= (bignum*) malloc(sizeof(bignum));
@@ -495,6 +577,10 @@ bignum* init_mul_ptr(long length){
     return result;
 }
 
+/**
+ * a division helper
+ * Q <- num1 / num2
+ */
 void div_helper(bignum *num1,bignum *num2,bignum * F){
     if(compare(num1,num2) < 0){
         Q = init_mul_ptr(num1->number_of_links/2);
@@ -515,7 +601,9 @@ void div_helper(bignum *num1,bignum *num2,bignum * F){
     }
 }
 
-
+/**
+ * compares between two given bignums
+ */
 int compare(bignum * bn1,bignum * bn2){
     equalize_links(bn1,bn2);
     link* curr1 = bn1->head;
@@ -529,6 +617,11 @@ int compare(bignum * bn1,bignum * bn2){
     return curr1->num - curr2->num;
 }
 
+/**
+ *  makes a copy of given bignum
+ * @param bn - bignum to copy
+ * @return a copy of bn
+ */
 bignum* copy_bignum(bignum* bn) {
     bignum* bn_copy = (bignum *) malloc(sizeof(bignum));
     bn_copy->number_of_links = 1;
